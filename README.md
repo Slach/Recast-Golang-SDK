@@ -1,4 +1,4 @@
-# SDK-Golang
+# Recast.AI - SDK-Golang
 
 [logo]: https://github.com/RecastAI/SDK-NodeJs/blob/master/misc/logo-inline.png "Recast.AI"
 
