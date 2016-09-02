@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	recastAPIURL string = "https://api.recast.ai/v1/request"
+	//APIEndpoint : Recast.AI api
+	APIEndpoint string = "https://api.recast.ai/v2/request"
 )
 
 // Client handles text and voice-file requests to Recast.Ai
@@ -42,7 +43,7 @@ func (c *Client) SetLanguage(language string) {
 
 // TextRequest process a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two para,eters can be provided: are "token" and "language". They will be used instead of the client token and language(if one is set).
-func (c *Client) TextRequest(text string, opts map[string]string) (*Response, error) {
+func (c *Client) TextRequest(text string, opts map[string]string) (Response, error) {
 	var token string
 	hasLang := false
 	lang := ""
@@ -71,26 +72,26 @@ func (c *Client) TextRequest(text string, opts map[string]string) (*Response, er
 	}
 	form.Add("text", text)
 
-	req, err := http.NewRequest("POST", recastAPIURL, strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", APIEndpoint, strings.NewReader(form.Encode()))
 	if err != nil {
-		return nil, err
+		return Response{}, err
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return Response{}, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Request failed: %s", resp.Status)
+		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
 	}
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	response, err := newResponse(string(body))
+	response, err := NewResponse(body)
 	if err != nil {
-		return nil, err
+		return Response{}, err
 	}
 	return response, nil
 
@@ -99,7 +100,7 @@ func (c *Client) TextRequest(text string, opts map[string]string) (*Response, er
 // FileRequest handles voice file request to Recast.Ai and returns a Response
 // TextRequest process a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: "token" and "language". They will be used instead of the client token and language.
-func (c *Client) FileRequest(filename string, opts map[string]string) (*Response, error) {
+func (c *Client) FileRequest(filename string, opts map[string]string) (Response, error) {
 	var request *http.Request
 	var file *os.File
 	var fileContent []byte
@@ -108,6 +109,7 @@ func (c *Client) FileRequest(filename string, opts map[string]string) (*Response
 	var resp *http.Response
 	var err error
 	var token string
+	var response Response
 
 	hasLang := false
 	lang := ""
@@ -130,11 +132,11 @@ func (c *Client) FileRequest(filename string, opts map[string]string) (*Response
 	}
 
 	if file, err = os.Open(filename); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	if fileContent, err = ioutil.ReadAll(file); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	defer file.Close()
@@ -143,29 +145,29 @@ func (c *Client) FileRequest(filename string, opts map[string]string) (*Response
 	writer := multipart.NewWriter(body)
 
 	if filePart, err = writer.CreateFormFile("voice", file.Name()); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	if _, err := filePart.Write(fileContent); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	if hasLang {
 		if langPart, err = writer.CreateFormField("language"); err != nil {
-			return nil, err
+			return response, err
 		}
 
 		if _, err := langPart.Write([]byte(lang)); err != nil {
-			return nil, err
+			return response, err
 		}
 	}
 
 	if err := writer.Close(); err != nil {
-		return nil, err
+		return response, err
 	}
 
-	if request, err = http.NewRequest("POST", recastAPIURL, body); err != nil {
-		return nil, err
+	if request, err = http.NewRequest("POST", APIEndpoint, body); err != nil {
+		return response, err
 	}
 
 	request.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
@@ -173,7 +175,7 @@ func (c *Client) FileRequest(filename string, opts map[string]string) (*Response
 	client := &http.Client{}
 
 	if resp, err = client.Do(request); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	defer resp.Body.Close()
@@ -181,11 +183,11 @@ func (c *Client) FileRequest(filename string, opts map[string]string) (*Response
 	responseBody, _ := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Request failed: %s (%s)", resp.Status, string(responseBody))
+		return response, fmt.Errorf("Request failed: %s (%s)", resp.Status, string(responseBody))
 	}
-	response, err := newResponse(string(responseBody))
+	response, err = NewResponse(responseBody)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 	return response, nil
 }
