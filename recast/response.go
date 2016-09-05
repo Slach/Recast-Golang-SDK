@@ -34,16 +34,3 @@ type Response struct {
 	Timestamp time.Time           `json:"timestamp"`
 	Status    int                 `json:"status"`
 }
-
-// Intent defines the details which define a single intent
-type Intent struct {
-	Name       string
-	Confidence float64
-}
-
-// Entity defines the details for a single entity
-type Entity struct {
-	data       map[string]interface{} // Json data
-	Name       string
-	Confidence float64
-}
