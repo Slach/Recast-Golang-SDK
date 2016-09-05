@@ -1,5 +1,7 @@
 package recast
 
+import "time"
+
 const (
 	ActAssert  = "assert"
 	ActCommand = "command"
@@ -18,25 +20,28 @@ const (
 	SentimentNeutral  = "neutral"
 )
 
+// Response is the HTTP response from the Recast API
 type Response struct {
-	Source    string
-	Intents   []Intent
-	Act       string
-	Type      string
-	Negated   bool
-	Sentiment string
-	Entities  map[string][]Entity
-	Language  string
-	Version   string
-	Timestamp string
-	Status    int
+	Source    string              `json:"source"`
+	Intents   []Intent            `json:"intents"`
+	Act       string              `json:"act"`
+	Type      string              `json:"type"`
+	Negated   bool                `json:"negated"`
+	Sentiment string              `json:"sentiment"`
+	Entities  map[string][]Entity `json:"entities"`
+	Language  string              `json:"language"`
+	Version   string              `json:"version"`
+	Timestamp time.Time           `json:"timestamp"`
+	Status    int                 `json:"status"`
 }
 
+// Intent defines the details which define a single intent
 type Intent struct {
 	Name       string
 	Confidence float64
 }
 
+// Entity defines the details for a single entity
 type Entity struct {
 	data       map[string]interface{} // Json data
 	Name       string
