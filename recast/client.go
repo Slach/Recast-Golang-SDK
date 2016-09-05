@@ -64,7 +64,7 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		}
 
 		if opts.Token != "" {
-			token = ""
+			token = opts.Token
 		}
 	}
 
@@ -78,30 +78,31 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		form.Add("language", lang)
 	}
 
-	req, err := http.NewRequest("POST", APIEndpoint, strings.NewReader(form.Encode()))
-	if err != nil {
-		return Response{}, err
-	}
-
+	req, _ := http.NewRequest("POST", APIEndpoint, strings.NewReader(form.Encode()))
 	req.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return Response{}, err
 	}
+
 	if resp.StatusCode != 200 {
 		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
 	}
 
 	defer resp.Body.Close()
 
-	var r Response
+	type respJSON struct {
+		Results *Response `json:"results"`
+	}
+
+	var r respJSON
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		return Response{}, err
 	}
 
-	return r, nil
+	return *r.Results, nil
 }
 
 // FileRequest handles voice file request to Recast.Ai and returns a Response
@@ -116,7 +117,7 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 		}
 
 		if opts.Token != "" {
-			token = ""
+			token = opts.Token
 		}
 	}
 
