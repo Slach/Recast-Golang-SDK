@@ -15,9 +15,11 @@ const (
 	TypeLocation     = "loc:"
 	TypeNumber       = "num:"
 
-	SentimentPositive = "positive"
-	SentimentNegative = "negative"
-	SentimentNeutral  = "neutral"
+	SentimentPositive     = "positive"
+	SentimentVeryPositive = "vpositive"
+	SentimentNegative     = "negative"
+	SentimentVeryNegative = "vnegative"
+	SentimentNeutral      = "neutral"
 )
 
 // Response is the HTTP response from the Recast API
@@ -26,7 +28,6 @@ type Response struct {
 	Intents   []Intent            `json:"intents"`
 	Act       string              `json:"act"`
 	Type      string              `json:"type"`
-	Negated   bool                `json:"negated"`
 	Sentiment string              `json:"sentiment"`
 	Entities  map[string][]Entity `json:"entities"`
 	Language  string              `json:"language"`
