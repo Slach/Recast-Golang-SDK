@@ -50,7 +50,6 @@ This module contains 4 main structures, as follows:
 
 * recast.Client is the client allowing you to make requests.
 * recast.Response contains the response from [Recast.AI](https://recast.ai).
-* recast.Sentence represents a sentence of the response.
 * recast.Entity represents an entity found by Recast.AI in your user's input.
 * recast.Intent represents an intent of the response
 
