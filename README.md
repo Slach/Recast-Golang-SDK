@@ -20,7 +20,7 @@ go get -t github.com/RecastAI/SDK-golang/recast
 
 ## Usage
 
-### Module
+### Package
 
 ```go
 import "github.com/RecastAI/SDK-Golang/recast"
@@ -35,7 +35,7 @@ func main() {
 
     intent, err := response.Intent()
     if err != nil {
-            // No intent found
+		// No intent found
     } else if intent == YOUR_INTENT {
         // Do your code...
     }
@@ -48,10 +48,11 @@ func main() {
 
 This module contains 4 main structures, as follows:
 
-* Client is the client allowing you to make requests.
-* Response contains the response from [Recast.AI](https://recast.ai).
-* Sentence represents a sentence of the response.
-* Entity represents an entity found by Recast.AI in your user's input.
+* recast.Client is the client allowing you to make requests.
+* recast.Response contains the response from [Recast.AI](https://recast.ai).
+* recast.Sentence represents a sentence of the response.
+* recast.Entity represents an entity found by Recast.AI in your user's input.
+* recast.Intent represents an intent of the response
 
 Don't hesitate to dive into the code, it's commented ;)
 
@@ -59,10 +60,16 @@ Don't hesitate to dive into the code, it's commented ;)
 
 The Recast.AI Client can be instanciated with a token and provides the two following methods:
 
-* textRequest(text string, opts map[string]string) *Performs a text request*
-* fileRequest(file string, opts map[string]string) *Performs a voice file request*
+* textRequest(text string, opts ReqOpts) *Performs a text request*
+* fileRequest(file string, opts ReqOpts) *Performs a voice file request*
 
-*Accepted options are "token" to override the token of the client, and language, to specify the language of the input*
+*Accepted options are "Token" to override the token of the client, and "Language", to specify the language of the input*
+
+If no language is provided in the request, Recast.AI does the following:
+
+* TextRequest: the language of the text is detected and is used for processing if your bot has expressions for it, else your bot's primary language is used for processing.
+* VoiceRequest: your bot's primary language is used for processing as we do not provide language detection for speech.
+
 
 ```go
 import "github.com/RecastAI/SDK-Golang/recast"
@@ -73,9 +80,9 @@ func main() {
 
     client = &recast.Client{}
 
-    response, err := client.FileRequest(YOUR_VOICE_FILE, map[string]string {
-		"token": YOUR_TOKEN,
-		"language": "en",
+    response, err := client.FileRequest(YOUR_VOICE_FILE, recast.ReqOpts{
+		Token: YOUR_TOKEN,
+		Language: "en",
 	})
     if err != nil {
 		// Handle error
@@ -84,19 +91,42 @@ func main() {
 ```
 
 ### Response
+The Response struct contains the following attributes:
+```go
+type Response struct {
+	Source    string
+	Intents   []Intent
+	Act       string
+	Type      string
+	Sentiment string
+	Entities  map[string][]Entity
+	Language  string
+	Version   string
+	Timestamp time.Time
+	Status    int
+}
+```
 
 The Recast.AI Response is generated after a call with the two previous methods and contains the following methods:
-* Languages() *Returns the language of the input*
-* Sentence()  *Returns the first detected sentence*
-* Sentences() *Returns all sentences detected in the input*
-* Intent()    *Returns the first matched intent*
-* Intents() *Returns all intents detected, ordered by propability*
-* Status() *Returns the status of the response*
-* Timestamp() *Returns the timestamp of the request *
-* Version() *Returns the version of the json*
-* Entity(name string) *Returns the first entity matching -name-*
-* Entities(name string) *Returns all entities matching -names-*
-* AllEntities(names ...string) *Returns all entities matching -names-*
+
+* Intent() *Intent returns the first matched intent, or an error if no intent where matched*
+* IsAbbreviation() *IsAbbreviation returns whether or not the sentence is asking for an abbreviation*
+* IsEntity() *IsEntity returns whether or not the sentence is asking for an entity*
+* IsDescription() *IsDescription returns whether or not the sentence is asking for an description*
+* IsHuman() *IsHuman returns whether or not the sentence is asking for an human*
+* IsLocation() *IsLocation returns whether or not the sentence is asking for an location*
+* IsNumber() *IsNumber returns whether or not the sentence is asking for an number*
+* IsPositive() *IsPositive returns whether or not the sentiment is positive*
+* IsVeryPositive() *IsVeryPositive returns whether or not the sentiment is very positive*
+* IsNeutral() *IsNeutral returns whether or not the sentiment is neutral*
+* IsNegative() *IsNegative returns whether or not the sentiment is negative*
+* IsVeryNegative() *IsVeryNegative returns whether or not the sentiment is very negative*
+* IsAssert() *IsAssert returns whether or not the sentence is an assertion*
+* IsCommand() *IsCommand returns whether or not the sentence is a command*
+* IsWhQuery() *IsWhQuery returns whether or not the sentence is a wh query*
+* IsYnQuery() *IsYnQuery returns whether or not the sentence is a yes-no question*
+* Get(name string) *Returns the first entity matching -name-*
+* All(name string) *Returns all entities matching -name-*
 
 ```go
 resp, err := client.TextRequest("Give me a recipe with asparagus. And a recipe with tomatoes.")
@@ -110,48 +140,28 @@ if err != nil {
 }
 
 if intent == "recipe" {
-	var entitiesMap map[string][]*recast.Entity
-    var ingredients []*recast.Entity
+    var ingredients []recast.Entity
 
     // get all 'ingredients' entities
-    entitiesMap = response.AllEntities()
-    ingredients = response.Entities("ingredients")
-}
-fmt.Printf("This request has been filled at %s\n", resp.Timestamp())
-```
-
-### Sentence
-
-The Recast.AI Sentence is generated by the Recast.AI Response constructor and provides the following methods:
-
-* Source() *The source of the sentence*
-* Type() *The type of the sentence*
-* Action() *The action of the sentence*
-* Agent() *The agent of the sentence*
-* Polarity() *The polarity (negation or not) of the sentence*
-* Entities() *All the entities detected in the sentence*
-* Entities(name string) *Returns a slice of entities of type -name-*
-* AllEntities(names ...string) *Returns a all entities matching one of -names-*
-
-```go
-resp, err := client.TextRequest("Tell me a joke.")
-if err != nil {
-	// Handle error
-}
-sentence := resp.Sentence()
-if sentence.Action() == "tell" && sentence.Polarity() == "positive" {
-	// Tell a joke...
+    ingredients = response.All("ingredients")
 }
 ```
 
 ### Entity
+The Response struct contains the following attributes:
+```go
+type Entity struct {
+	Data       map[string]interface{}
+	Name       string
+	Confidence float64
+}
+```
 
-The Recast.AI Entity is generated by the Recast.AI Sentence and provides the following methods:
+The Recast.AI Entity is generated by the Recast.AI Sentence and provides the following method:
 
-* Name() *The name of the entity*
-* Raw() *The raw text on which the entity was detected*
+* Get(field string) *Returns an interface{} corresponding to a field of the entity*
 
-In addition to Name and Raw, more attributes can be accessed by the Field method which can be one of the following:
+Attributes can be accessed by the Get method which can be one of the following:
 
 * hex
 * value
@@ -170,13 +180,13 @@ In addition to Name and Raw, more attributes can be accessed by the Field method
 
 ```go
 response, _ := client.TextRequest("What's the weather in San Francisco?")
-var location *recast.Entity
-location = response.Entity("location")
+var location recast.Entity
+location = response.Get("location")
 if response.Intent() == "weather" && location != nil {
-	fmt.Printf("You asked me for the weather in %s\n", location.Field("formated").(string))
+	fmt.Printf("You asked me for the weather in %s\n", location.Get("formated").(string))
 }
 ```
-***Recast.AI entity fields type are dependant on the entity itself so Field returns an interface{}, you must do a type assertion as follows:***
+***Recast.AI entity fields type are dependant on the entity itself so Get returns an interface{}, you must do a type assertion as follows:***
 * Numbers: float64
 * Strings: string
 

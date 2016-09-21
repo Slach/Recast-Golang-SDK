@@ -86,21 +86,41 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		return Response{}, err
 	}
 
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
 	}
-
-	defer resp.Body.Close()
 
 	type respJSON struct {
 		Results *Response `json:"results"`
 	}
 
-	var r respJSON
-	err = json.NewDecoder(resp.Body).Decode(&r)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return Response{}, err
 	}
+	body2 := make([]byte, len(body))
+	copy(body2, body)
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return Response{}, err
+	}
+
+	type result struct {
+		Entities map[string]interface{} `json:"entities"`
+	}
+	type respStruct struct {
+		Results *result `json:"results"`
+	}
+	var respStr respStruct
+	err = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
+	if err != nil {
+		return Response{}, err
+	}
+	r.Results.fillEntities(respStr.Results.Entities)
 
 	return *r.Results, nil
 }
@@ -180,11 +200,39 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 	}
 	defer resp.Body.Close()
 
-	var r Response
-	err = json.NewDecoder(resp.Body).Decode(&r)
+	if resp.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
+	}
+
+	type respJSON struct {
+		Results *Response `json:"results"`
+	}
+
+	body1, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Response{}, err
+	}
+	body2 := make([]byte, len(body1))
+	copy(body2, body1)
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body1)).Decode(&r)
 	if err != nil {
 		return Response{}, err
 	}
 
-	return r, nil
+	type result struct {
+		Entities map[string]interface{} `json:"entities"`
+	}
+	type respStruct struct {
+		Results *result `json:"results"`
+	}
+	var respStr respStruct
+	err = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
+	if err != nil {
+		return Response{}, err
+	}
+	r.Results.fillEntities(respStr.Results.Entities)
+
+	return *r.Results, nil
 }

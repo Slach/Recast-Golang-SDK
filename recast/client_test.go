@@ -126,6 +126,101 @@ func TestTextRequestAPIReturnsBadRequest(t *testing.T) {
 	}
 }
 
+func TestFileRequestFileNotFound(t *testing.T) {
+	testClient := Client{
+		token:    "mocktoken",
+		language: "en",
+	}
+	testFilename := "./someFilenameThatDoesntExist"
+
+	_, err := testClient.FileRequest(testFilename, nil)
+	if err == nil {
+		t.Fatalf("Expected err to not be nil, but instead got nil")
+	}
+}
+
+func TestFileRequestBadRequest(t *testing.T) {
+	testClient := Client{
+		token:    "mocktoken",
+		language: "en",
+	}
+	testFilename := "./test/test.wav"
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	res := httpmock.NewStringResponder(http.StatusBadRequest, getBadRequestFormatJSONResponse())
+	httpmock.RegisterResponder("POST", APIEndpoint, res)
+
+	_, err := testClient.FileRequest(testFilename, nil)
+	if err == nil {
+		t.Fatalf("Expected err to not be nil, but instead got nil")
+	}
+}
+
+func TestFileRequestWhenNoTokenIsSet(t *testing.T) {
+	var testClient Client
+	testFilename := "./test/test.wav"
+	expectedErr := ErrTokenNotSet
+
+	testCases := []*ReqOpts{
+		nil,
+		&ReqOpts{Language: "en"},
+		&ReqOpts{},
+	}
+
+	for i, tc := range testCases {
+		_, err := testClient.FileRequest(testFilename, tc)
+		if err == nil {
+			t.Fatalf("Expected Error %+v, but got back nil for test case:%d", expectedErr, i)
+		}
+
+		if err != nil && err != expectedErr {
+			t.Fatalf("Expected Error %+v, but got back %+v for test case:%d", expectedErr, err, i)
+		}
+	}
+}
+
+func TestFileRequestReturnsSuccessfulResponse(t *testing.T) {
+	testClient := Client{
+		token:    "mocktoken",
+		language: "en",
+	}
+
+	testFilename := "./test/test.wav"
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	res := httpmock.NewStringResponder(http.StatusOK, getSuccessfulJSONResponse())
+	httpmock.RegisterResponder("POST", APIEndpoint, res)
+
+	r, err := testClient.FileRequest(testFilename, nil)
+	if err != nil {
+		t.Fatalf("Expected err to be nil, but instead got %+v", err)
+	}
+
+	if r.Status != http.StatusOK {
+		t.Fatalf("Expected status on response object to be %d, but instead got back: %d", http.StatusOK, r.Status)
+	}
+
+	opts := ReqOpts{
+		Token: "someother token",
+	}
+
+	res = httpmock.NewStringResponder(http.StatusOK, getSuccessfulJSONResponse())
+	httpmock.RegisterResponder("POST", APIEndpoint, res)
+
+	r, err = testClient.FileRequest(testFilename, &opts)
+	if err != nil {
+		t.Fatalf("Expected err to be nil, but instead got %+v", err)
+	}
+
+	if r.Status != http.StatusOK {
+		t.Fatalf("Expected status on response object to be %d, but instead got back: %d", http.StatusOK, r.Status)
+	}
+}
+
 func getBadRequestFormatJSONResponse() string {
 	return `{"results":null,"message":"Request is invalid"}`
 }
@@ -136,7 +231,7 @@ func getBadFormatJSONResponse() string {
       "source":"WhatistheweatherinLondontomorrow?AndinParis?",
       "intents":[
          {
-            "name":"weather",
+            "slug":"weather",
             "confidence":0.67
          }
       ,
@@ -149,13 +244,12 @@ func getSuccessfulJSONResponse() string {
       "source":"WhatistheweatherinLondontomorrow?AndinParis?",
       "intents":[
          {
-            "name":"weather",
+            "slug":"weather",
             "confidence":0.67
          }
       ],
       "act":"wh-query",
       "type":"desc:desc",
-      "negated":false,
       "sentiment":"neutral",
       "entities":{
          "action":[
