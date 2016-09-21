@@ -197,12 +197,14 @@ Refer to [Recast.Ai Entities Manual](https://man.recast.ai/#list-of-entities) fo
 
 You can view the whole API reference at [man.recast.ai](https://man.recast.ai).
 
-
-## Author
-
-François Triquet, francois.triquet@recast.ai
-
 You can follow us on Twitter at [@recastai](https://twitter.com/recastai) for updates and releases.
+
+
+
+## Contributors
+
+[François Triquet](https://github.com/ftriquet), francois.triquet@recast.ai
+[Saif Abid](https://github.com/saifabid)
 
 ## License
 
