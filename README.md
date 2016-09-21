@@ -129,12 +129,12 @@ The Recast.AI Response is generated after a call with the two previous methods a
 * All(name string) *Returns all entities matching -name-*
 
 ```go
-resp, err := client.TextRequest("Give me a recipe with asparagus. And a recipe with tomatoes.")
+response, err := client.TextRequest("Give me a recipe with asparagus. And a recipe with tomatoes.")
 if err != nil {
 // Handle error
 }
 
-intent, err := resp.Intent()
+intent, err := response.Intent()
 if err != nil {
 // No intent matches input
 }
