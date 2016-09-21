@@ -36,7 +36,7 @@ func main() {
     intent, err := response.Intent()
     if err != nil {
 		// No intent found
-    } else if intent == YOUR_INTENT {
+    } else if intent.Name == YOUR_INTENT {
         // Do your code...
     }
 }
