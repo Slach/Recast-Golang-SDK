@@ -204,6 +204,7 @@ You can follow us on Twitter at [@recastai](https://twitter.com/recastai) for up
 ## Contributors
 
 [François Triquet](https://github.com/ftriquet), francois.triquet@recast.ai
+
 [Saif Abid](https://github.com/saifabid)
 
 ## License
