@@ -1,15 +1,19 @@
 package recast
 
-func NewEntity(name string, jsonData map[string]interface{}) Entity {
-	var e Entity
+// Entity defines the details for a single entity
+type Entity struct {
+	Data       map[string]interface{} `json:"data"`
+	Name       string                 `json:"name"`
+	Confidence float64                `json:"confidence"`
+}
 
-	e.data = jsonData
-	e.Name = name
-	e.Confidence, _ = jsonData["confidence"].(float64)
-
+func newEntity(name string, data map[string]interface{}) Entity {
+	e := Entity{data, name, 0.0}
+	e.Confidence, _ = data["confidence"].(float64)
 	return e
 }
 
+// Get returns an entities data
 func (e Entity) Get(field string) interface{} {
-	return e.data[field]
+	return e.Data[field]
 }

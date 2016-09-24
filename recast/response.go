@@ -1,75 +1,166 @@
 package recast
 
 import (
-	"encoding/json"
 	"errors"
+	"fmt"
+	"regexp"
+	"time"
 )
 
-//NewResponse returns a initialized response containing the sentecne informations
-func NewResponse(jsonData []byte) (Response, error) {
-	var temp map[string]interface{}
-	var r Response
+const (
+	ActAssert  = "assert"
+	ActCommand = "command"
+	ActWhQuery = "wh-query"
+	ActYnQuery = "yn-query"
 
-	err := json.Unmarshal(jsonData, &temp)
-	if err != nil {
-		return r, errors.New("Invalid JSON")
-	}
+	TypeAbbreviation = "abbr:"
+	TypeEntity       = "enty:"
+	TypeDescription  = "desc:"
+	TypeHuman        = "hum:"
+	TypeLocation     = "loc:"
+	TypeNumber       = "num:"
 
-	results, ok := temp["results"].(map[string]interface{})
-	if !ok {
-		return r, errors.New("Invalid JSON")
-	}
+	SentimentPositive     = "positive"
+	SentimentVeryPositive = "vpositive"
+	SentimentNegative     = "negative"
+	SentimentVeryNegative = "vnegative"
+	SentimentNeutral      = "neutral"
+)
 
-	r.Source, _ = results["source"].(string)
-	r.Act, _ = results["act"].(string)
-	r.Type, _ = results["type"].(string)
-	r.Negated, _ = results["negated"].(bool)
-	r.Sentiment, _ = results["sentiment"].(string)
-	r.Language, _ = results["language"].(string)
-	r.Version, _ = results["version"].(string)
-	r.Timestamp, _ = results["timestamp"].(string)
-	r.Status, _ = results["status"].(int)
+// Response is the HTTP response from the Recast API
+type Response struct {
+	Source    string              `json:"source"`
+	Intents   []Intent            `json:"intents"`
+	Act       string              `json:"act"`
+	Type      string              `json:"type"`
+	Sentiment string              `json:"sentiment"`
+	Entities  map[string][]Entity `json:"entities"`
+	Language  string              `json:"language"`
+	Version   string              `json:"version"`
+	Timestamp time.Time           `json:"timestamp"`
+	Status    int                 `json:"status"`
+}
 
+func (r *Response) fillEntities(data map[string]interface{}) {
 	r.Entities = make(map[string][]Entity)
-	entitiesMap, ok := results["entities"].(map[string]interface{})
-	if !ok {
-		return r, errors.New("Invalid JSON")
-	}
-
-	for name, _entities := range entitiesMap {
-		entities, ok := _entities.([]interface{})
+	for k, v := range data {
+		ents, ok := v.([]interface{})
 		if !ok {
-			return r, errors.New("Invalid JSON")
+			return
 		}
-
-		for _, _entity := range entities {
-			entity, ok := _entity.(map[string]interface{})
+		for _, ent := range ents {
+			entityData, ok := ent.(map[string]interface{})
 			if !ok {
-				return r, errors.New("Invalid JSON")
+				return
 			}
-
-			r.Entities[name] = append(r.Entities[name], NewEntity(name, entity))
+			r.Entities[k] = append(r.Entities[k], newEntity(k, entityData))
 		}
 	}
+}
 
-	intentsArray, ok := results["intents"].([]interface{})
-	if !ok {
-		return r, errors.New("Invalid JSON")
+// All returns all the entities matching `name` or nil if not present
+func (r Response) All(name string) []Entity {
+	return r.Entities[name]
+}
+
+// Get returns the first entity matching `name` or an error if not present
+func (r Response) Get(name string) (Entity, error) {
+	if r.Entities[name] != nil && len(r.Entities[name]) > 0 {
+		return r.Entities[name][0], nil
 	}
+	return Entity{}, fmt.Errorf("No entity matching %s found", name)
+}
 
-	for _, _intent := range intentsArray {
-		intent, ok := _intent.(map[string]interface{})
-		if !ok {
-			return r, errors.New("Invalid JSON")
-		}
-		name, ok := intent["name"].(string)
-		confidence, ok2 := intent["confidence"].(float64)
-		if !ok || !ok2 {
-			return r, errors.New("Invalid JSON")
-		}
-
-		r.Intents = append(r.Intents, Intent{name, confidence})
+func (r Response) isType(exp string) bool {
+	regex, err := regexp.Compile("^" + exp + "\\w*")
+	if err != nil {
+		return false
 	}
+	if regex.Find([]byte(r.Type)) != nil {
+		return true
+	}
+	return false
+}
 
-	return r, nil
+// Intent returns the first matched intent, or an error if no intent where matched
+func (r Response) Intent() (Intent, error) {
+	if len(r.Intents) > 0 {
+		return r.Intents[0], nil
+	}
+	return Intent{}, errors.New("No intent matched")
+}
+
+// IsAbbreviation returns whether or not the sentence is asking for an abbreviation
+func (r Response) IsAbbreviation() bool {
+	return r.isType(TypeAbbreviation)
+}
+
+// IsEntity returns whether or not the sentence is asking for an entity
+func (r Response) IsEntity() bool {
+	return r.isType(TypeEntity)
+}
+
+// IsDescription returns whether or not the sentence is asking for an description
+func (r Response) IsDescription() bool {
+	return r.isType(TypeDescription)
+}
+
+// IsHuman returns whether or not the sentence is asking for an human
+func (r Response) IsHuman() bool {
+	return r.isType(TypeHuman)
+}
+
+// IsLocation returns whether or not the sentence is asking for an location
+func (r Response) IsLocation() bool {
+	return r.isType(TypeLocation)
+}
+
+// IsNumber returns whether or not the sentence is asking for an number
+func (r Response) IsNumber() bool {
+	return r.isType(TypeNumber)
+}
+
+// IsPositive returns whether or not the sentiment is positive
+func (r Response) IsPositive() bool {
+	return r.Sentiment == SentimentPositive
+}
+
+// IsVeryPositive returns whether or not the sentiment is very positive
+func (r Response) IsVeryPositive() bool {
+	return r.Sentiment == SentimentVeryPositive
+}
+
+// IsNeutral returns whether or not the sentiment is neutral
+func (r Response) IsNeutral() bool {
+	return r.Sentiment == SentimentNeutral
+}
+
+// IsNegative returns whether or not the sentiment is negative
+func (r Response) IsNegative() bool {
+	return r.Sentiment == SentimentNegative
+}
+
+// IsVeryNegative returns whether or not the sentiment is very negative
+func (r Response) IsVeryNegative() bool {
+	return r.Sentiment == SentimentVeryNegative
+}
+
+// IsAssert returns whether or not the sentence is an assertion
+func (r Response) IsAssert() bool {
+	return r.Act == ActAssert
+}
+
+// IsCommand returns whether or not the sentence is a command
+func (r Response) IsCommand() bool {
+	return r.Act == ActCommand
+}
+
+// IsWhQuery returns whether or not the sentence is a wh query
+func (r Response) IsWhQuery() bool {
+	return r.Act == ActWhQuery
+}
+
+// IsYnQuery returns whether or not the sentence is a yes-no question
+func (r Response) IsYnQuery() bool {
+	return r.Act == ActYnQuery
 }
