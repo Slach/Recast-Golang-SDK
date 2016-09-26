@@ -36,7 +36,7 @@ func main() {
     intent, err := response.Intent()
     if err != nil {
 		// No intent found
-    } else if intent.Name == YOUR_INTENT {
+    } else if intent.Slug == YOUR_INTENT {
         // Do your code...
     }
 }
@@ -138,7 +138,7 @@ if err != nil {
 // No intent matches input
 }
 
-if intent == "recipe" {
+if intent.Slug == "recipe" {
     var ingredients []recast.Entity
 
     // get all 'ingredients' entities
@@ -181,7 +181,8 @@ Attributes can be accessed by the Get method which can be one of the following:
 response, _ := client.TextRequest("What's the weather in San Francisco?")
 var location recast.Entity
 location = response.Get("location")
-if response.Intent() == "weather" && location != nil {
+intent, _ := response.Intent()
+if intent.Slug == "weather" && location != nil {
 	fmt.Printf("You asked me for the weather in %s\n", location.Get("formated").(string))
 }
 ```
