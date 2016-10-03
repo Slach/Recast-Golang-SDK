@@ -2,8 +2,9 @@ package recast
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -13,14 +14,25 @@ import (
 )
 
 const (
-	recastAPIURL string = "https://api.recast.ai/v1/request"
+	//APIEndpoint : Recast.AI api
+	APIEndpoint string = "https://api.recast.ai/v2/request"
+)
+
+var (
+	// ErrTokenNotSet is returned when the token for a client is empty
+	ErrTokenNotSet = errors.New("Request cannot be made without a token set")
 )
 
 // Client handles text and voice-file requests to Recast.Ai
 type Client struct {
-	token       string
-	language    string
-	hasLanguage bool
+	token    string
+	language string
+}
+
+// ReqOpts are used to overwrite the client token and language on a per request baises if a user wises to do so
+type ReqOpts struct {
+	Token    string
+	Language string
 }
 
 // NewClient returns a new Recast.Ai client
@@ -41,151 +53,186 @@ func (c *Client) SetLanguage(language string) {
 }
 
 // TextRequest process a text request to Recast.AI API and returns a Response
-// opts is a map of parameters used for the request. Two para,eters can be provided: are "token" and "language". They will be used instead of the client token and language(if one is set).
-func (c *Client) TextRequest(text string, opts map[string]string) (*Response, error) {
-	var token string
-	hasLang := false
-	lang := ""
-
-	if c.language != "" {
-		hasLang = true
-		lang = c.language
-	}
+// opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
+// Set opts to nil if you want the request to use your default client token and language
+func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
+	lang := c.language
+	token := c.token
 	if opts != nil {
-		if _, ok := opts["language"]; ok {
-			hasLang = true
-			lang = opts["language"]
+		if opts.Language != "" {
+			lang = opts.Language
 		}
-		if _, ok := opts["token"]; ok {
-			token = opts["token"]
-		} else {
-			token = c.token
+
+		if opts.Token != "" {
+			token = opts.Token
 		}
-	} else {
-		token = c.token
+	}
+
+	if token == "" {
+		return Response{}, ErrTokenNotSet
 	}
 
 	form := url.Values{}
-	if hasLang {
+	form.Add("text", text)
+	if lang != "" {
 		form.Add("language", lang)
 	}
-	form.Add("text", text)
 
-	req, err := http.NewRequest("POST", recastAPIURL, strings.NewReader(form.Encode()))
-	if err != nil {
-		return nil, err
-	}
-
+	req, _ := http.NewRequest("POST", APIEndpoint, strings.NewReader(form.Encode()))
 	req.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Request failed: %s", resp.Status)
+		return Response{}, err
 	}
 
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	response, err := newResponse(string(body))
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
 
+	if resp.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
+	}
+
+	type respJSON struct {
+		Results *Response `json:"results"`
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Response{}, err
+	}
+	body2 := make([]byte, len(body))
+	copy(body2, body)
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return Response{}, err
+	}
+
+	type result struct {
+		Entities map[string]interface{} `json:"entities"`
+	}
+	type respStruct struct {
+		Results *result `json:"results"`
+	}
+	var respStr respStruct
+	err = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
+	if err != nil {
+		return Response{}, err
+	}
+	r.Results.fillEntities(respStr.Results.Entities)
+
+	return *r.Results, nil
 }
 
 // FileRequest handles voice file request to Recast.Ai and returns a Response
 // TextRequest process a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: "token" and "language". They will be used instead of the client token and language.
-func (c *Client) FileRequest(filename string, opts map[string]string) (*Response, error) {
-	var request *http.Request
-	var file *os.File
-	var fileContent []byte
-	var filePart io.Writer
-	var langPart io.Writer
-	var resp *http.Response
-	var err error
-	var token string
-
-	hasLang := false
-	lang := ""
-	if c.language != "" {
-		hasLang = true
-		lang = c.language
-	}
+func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
+	lang := c.language
+	token := c.token
 	if opts != nil {
-		if _, ok := opts["language"]; ok {
-			hasLang = true
-			lang = opts["language"]
+		if opts.Language != "" {
+			lang = opts.Language
 		}
-		if _, ok := opts["token"]; ok == false {
-			token = c.token
-		} else {
-			token = opts["token"]
+
+		if opts.Token != "" {
+			token = opts.Token
 		}
-	} else {
-		token = c.token
 	}
 
-	if file, err = os.Open(filename); err != nil {
-		return nil, err
+	if token == "" {
+		return Response{}, ErrTokenNotSet
 	}
 
-	if fileContent, err = ioutil.ReadAll(file); err != nil {
-		return nil, err
+	file, err := os.Open(filename)
+	if err != nil {
+		return Response{}, err
 	}
-
 	defer file.Close()
-	body := &bytes.Buffer{}
 
-	writer := multipart.NewWriter(body)
-
-	if filePart, err = writer.CreateFormFile("voice", file.Name()); err != nil {
-		return nil, err
+	fileContent, err := ioutil.ReadAll(file)
+	if err != nil {
+		return Response{}, err
 	}
 
-	if _, err := filePart.Write(fileContent); err != nil {
-		return nil, err
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	filePart, err := writer.CreateFormFile("voice", file.Name())
+	if err != nil {
+		return Response{}, err
 	}
 
-	if hasLang {
-		if langPart, err = writer.CreateFormField("language"); err != nil {
-			return nil, err
+	_, err = filePart.Write(fileContent)
+	if err != nil {
+		return Response{}, err
+	}
+
+	if lang != "" {
+		langPart, err := writer.CreateFormField("language")
+		if err != nil {
+			return Response{}, err
 		}
 
-		if _, err := langPart.Write([]byte(lang)); err != nil {
-			return nil, err
+		_, err = langPart.Write([]byte(lang))
+		if err != nil {
+			return Response{}, err
 		}
 	}
 
-	if err := writer.Close(); err != nil {
-		return nil, err
+	err = writer.Close()
+	if err != nil {
+		return Response{}, err
 	}
 
-	if request, err = http.NewRequest("POST", recastAPIURL, body); err != nil {
-		return nil, err
+	request, err := http.NewRequest("POST", APIEndpoint, &body)
+	if err != nil {
+		return Response{}, err
 	}
 
 	request.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 	client := &http.Client{}
-
-	if resp, err = client.Do(request); err != nil {
-		return nil, err
+	resp, err := client.Do(request)
+	if err != nil {
+		return Response{}, err
 	}
-
 	defer resp.Body.Close()
 
-	responseBody, _ := ioutil.ReadAll(resp.Body)
-
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Request failed: %s (%s)", resp.Status, string(responseBody))
+		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
 	}
-	response, err := newResponse(string(responseBody))
+
+	type respJSON struct {
+		Results *Response `json:"results"`
+	}
+
+	body1, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return Response{}, err
 	}
-	return response, nil
+	body2 := make([]byte, len(body1))
+	copy(body2, body1)
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body1)).Decode(&r)
+	if err != nil {
+		return Response{}, err
+	}
+
+	type result struct {
+		Entities map[string]interface{} `json:"entities"`
+	}
+	type respStruct struct {
+		Results *result `json:"results"`
+	}
+	var respStr respStruct
+	err = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
+	if err != nil {
+		return Response{}, err
+	}
+	r.Results.fillEntities(respStr.Results.Entities)
+
+	return *r.Results, nil
 }

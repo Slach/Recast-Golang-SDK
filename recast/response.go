@@ -1,128 +1,166 @@
 package recast
 
 import (
-	"encoding/json"
 	"errors"
+	"fmt"
+	"regexp"
+	"time"
 )
 
-// Response handles the response from Recast.Ai and provides utility to get informations
-// about data
+const (
+	ActAssert  = "assert"
+	ActCommand = "command"
+	ActWhQuery = "wh-query"
+	ActYnQuery = "yn-query"
+
+	TypeAbbreviation = "abbr:"
+	TypeEntity       = "enty:"
+	TypeDescription  = "desc:"
+	TypeHuman        = "hum:"
+	TypeLocation     = "loc:"
+	TypeNumber       = "num:"
+
+	SentimentPositive     = "positive"
+	SentimentVeryPositive = "vpositive"
+	SentimentNegative     = "negative"
+	SentimentVeryNegative = "vnegative"
+	SentimentNeutral      = "neutral"
+)
+
+// Response is the HTTP response from the Recast API
 type Response struct {
-	status    int
-	source    string
-	version   string
-	intents   []string
-	sentences []*Sentence
-	language  string
-	timestamp string
+	Source    string              `json:"source"`
+	Intents   []Intent            `json:"intents"`
+	Act       string              `json:"act"`
+	Type      string              `json:"type"`
+	Sentiment string              `json:"sentiment"`
+	Entities  map[string][]Entity `json:"entities"`
+	Language  string              `json:"language"`
+	Version   string              `json:"version"`
+	Timestamp time.Time           `json:"timestamp"`
+	Status    int                 `json:"status"`
 }
 
-func newResponse(jsonString string) (*Response, error) {
-	r := &Response{}
-	var temp map[string]interface{}
-	err := json.Unmarshal([]byte(jsonString), &temp)
-	if err != nil {
-		return nil, err
-	}
-	resultsMap := temp["results"].(map[string]interface{})
-	r.status = int(resultsMap["status"].(float64))
-	r.source = resultsMap["source"].(string)
-	r.version = resultsMap["version"].(string)
-	r.timestamp = resultsMap["timestamp"].(string)
-	r.language = resultsMap["language"].(string)
-	r.intents = make([]string, len(resultsMap["intents"].([]interface{})))
-	for i, intent := range resultsMap["intents"].([]interface{}) {
-		r.intents[i] = intent.(string)
-	}
-	r.sentences = make([]*Sentence, len(resultsMap["sentences"].([]interface{})))
-	for i, sentence := range resultsMap["sentences"].([]interface{}) {
-		r.sentences[i] = newSentence(sentence.(map[string]interface{}))
-	}
-	return r, nil
-}
-
-// Language returns the language of the processed text
-func (r *Response) Language() string {
-	return r.language
-}
-
-// Status returns the status of the request
-func (r *Response) Status() int {
-	return r.status
-}
-
-// Source returns the original text sent to Recast
-func (r *Response) Source() string {
-	return r.source
-}
-
-// Timestamp returns the timestamp of the request formatted following the ISO 8061 standard
-func (r *Response) Timestamp() string {
-	return r.timestamp
-}
-
-// Version returns the Recast version that processes the input
-func (r *Response) Version() string {
-	return r.version
-}
-
-//Intents returns a slice of strings representing the matched intents, order by probability
-func (r *Response) Intents() []string {
-	return r.intents
-}
-
-// Intent returns the main intent matched by Recast or an error if no intent where found
-func (r *Response) Intent() (string, error) {
-	if len(r.intents) > 0 {
-		return r.intents[0], nil
-	}
-	return "", errors.New("No intent found")
-}
-
-// Sentences returns a slice of Sentence
-func (r *Response) Sentences() []*Sentence {
-	return r.sentences
-}
-
-// Sentence returns the first sentence of the input
-func (r *Response) Sentence() *Sentence {
-	return r.sentences[0]
-}
-
-// Entity returns the first entity matching the name parameter
-func (r *Response) Entity(name string) *Entity {
-	for _, sentence := range r.sentences {
-		if ent := sentence.Entity(name); ent != nil {
-			return ent
+func (r *Response) fillEntities(data map[string]interface{}) {
+	r.Entities = make(map[string][]Entity)
+	for k, v := range data {
+		ents, ok := v.([]interface{})
+		if !ok {
+			return
 		}
-	}
-	return nil
-}
-
-// Entities returns a slice of Entity containing all entities matching with name
-func (r *Response) Entities(name string) []*Entity {
-	var entities []*Entity
-	for _, sentence := range r.sentences {
-		if sentenceEntities := sentence.Entities(name); len(sentenceEntities) > 0 {
-			entities = append(entities, sentenceEntities...)
-		}
-	}
-	if len(entities) > 0 {
-		return entities
-	}
-	return nil
-}
-
-// AllEntities returns a map containing slices of entities matching names, with names as keys
-// AllEntities called with no arguments returns a map of all entities detected in the input
-func (r *Response) AllEntities(names ...string) map[string][]*Entity {
-	entities := make(map[string][]*Entity)
-	for _, sentence := range r.sentences {
-		if sentenceEntities := sentence.AllEntities(names...); len(sentenceEntities) > 0 {
-			for entityName, ents := range sentenceEntities {
-				entities[entityName] = append(entities[entityName], ents...)
+		for _, ent := range ents {
+			entityData, ok := ent.(map[string]interface{})
+			if !ok {
+				return
 			}
+			r.Entities[k] = append(r.Entities[k], newEntity(k, entityData))
 		}
 	}
-	return entities
+}
+
+// All returns all the entities matching `name` or nil if not present
+func (r Response) All(name string) []Entity {
+	return r.Entities[name]
+}
+
+// Get returns the first entity matching `name` or an error if not present
+func (r Response) Get(name string) (Entity, error) {
+	if r.Entities[name] != nil && len(r.Entities[name]) > 0 {
+		return r.Entities[name][0], nil
+	}
+	return Entity{}, fmt.Errorf("No entity matching %s found", name)
+}
+
+func (r Response) isType(exp string) bool {
+	regex, err := regexp.Compile("^" + exp + "\\w*")
+	if err != nil {
+		return false
+	}
+	if regex.Find([]byte(r.Type)) != nil {
+		return true
+	}
+	return false
+}
+
+// Intent returns the first matched intent, or an error if no intent where matched
+func (r Response) Intent() (Intent, error) {
+	if len(r.Intents) > 0 {
+		return r.Intents[0], nil
+	}
+	return Intent{}, errors.New("No intent matched")
+}
+
+// IsAbbreviation returns whether or not the sentence is asking for an abbreviation
+func (r Response) IsAbbreviation() bool {
+	return r.isType(TypeAbbreviation)
+}
+
+// IsEntity returns whether or not the sentence is asking for an entity
+func (r Response) IsEntity() bool {
+	return r.isType(TypeEntity)
+}
+
+// IsDescription returns whether or not the sentence is asking for an description
+func (r Response) IsDescription() bool {
+	return r.isType(TypeDescription)
+}
+
+// IsHuman returns whether or not the sentence is asking for an human
+func (r Response) IsHuman() bool {
+	return r.isType(TypeHuman)
+}
+
+// IsLocation returns whether or not the sentence is asking for an location
+func (r Response) IsLocation() bool {
+	return r.isType(TypeLocation)
+}
+
+// IsNumber returns whether or not the sentence is asking for an number
+func (r Response) IsNumber() bool {
+	return r.isType(TypeNumber)
+}
+
+// IsPositive returns whether or not the sentiment is positive
+func (r Response) IsPositive() bool {
+	return r.Sentiment == SentimentPositive
+}
+
+// IsVeryPositive returns whether or not the sentiment is very positive
+func (r Response) IsVeryPositive() bool {
+	return r.Sentiment == SentimentVeryPositive
+}
+
+// IsNeutral returns whether or not the sentiment is neutral
+func (r Response) IsNeutral() bool {
+	return r.Sentiment == SentimentNeutral
+}
+
+// IsNegative returns whether or not the sentiment is negative
+func (r Response) IsNegative() bool {
+	return r.Sentiment == SentimentNegative
+}
+
+// IsVeryNegative returns whether or not the sentiment is very negative
+func (r Response) IsVeryNegative() bool {
+	return r.Sentiment == SentimentVeryNegative
+}
+
+// IsAssert returns whether or not the sentence is an assertion
+func (r Response) IsAssert() bool {
+	return r.Act == ActAssert
+}
+
+// IsCommand returns whether or not the sentence is a command
+func (r Response) IsCommand() bool {
+	return r.Act == ActCommand
+}
+
+// IsWhQuery returns whether or not the sentence is a wh query
+func (r Response) IsWhQuery() bool {
+	return r.Act == ActWhQuery
+}
+
+// IsYnQuery returns whether or not the sentence is a yes-no question
+func (r Response) IsYnQuery() bool {
+	return r.Act == ActYnQuery
 }

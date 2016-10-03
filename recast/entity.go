@@ -1,31 +1,19 @@
 package recast
 
-//An Entity represents a Recast entity and provides getter to access the entity fields
+// Entity defines the details for a single entity
 type Entity struct {
-	data map[string]interface{}
-	name string
+	Data       map[string]interface{} `json:"data"`
+	Name       string                 `json:"name"`
+	Confidence float64                `json:"confidence"`
 }
 
-// Field returns the value of the field gien by name, or nil if the field is not present
-// The value returned is an interface{} and should be cast as follows:
-// numbers: float64
-// strings : string
-// Refer to Recast.Ai manual for details about the entities
-func (e *Entity) Field(name string) interface{} {
-	for key, value := range e.data {
-		if name == key {
-			return value
-		}
-	}
-	return nil
+func newEntity(name string, data map[string]interface{}) Entity {
+	e := Entity{data, name, 0.0}
+	e.Confidence, _ = data["confidence"].(float64)
+	return e
 }
 
-// Name returns the name of the entity
-func (e *Entity) Name() string {
-	return e.name
-}
-
-// Raw returns the raw value of the entity, as it was in the original text
-func (e *Entity) Raw() string {
-	return e.data["raw"].(string)
+// Get returns an entities data
+func (e Entity) Get(field string) interface{} {
+	return e.Data[field]
 }
