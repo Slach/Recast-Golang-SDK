@@ -62,6 +62,7 @@ func TestResponseHelpers(t *testing.T) {
 	expect(r.Language == "en", t, "Should be an english sentence")
 	expect(r.Version == "2.0.0", t, "Should be v2")
 	expect(r.Status == 200, t, "Should be  a correct status")
+	expect(r.UUID == "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f", t, "")
 
 	expect(!r.IsAbbreviation(), t, "Should not ask for an abbreviation")
 	expect(r.IsDescription(), t, "Should ask for a description")
@@ -106,6 +107,7 @@ func TestResponseHelpers(t *testing.T) {
 func getSuccessNoIntentJSONResponse() string {
 	return `{
 		"results": {
+			"uuid": "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f",
 			"source": "Some text",
 			"intents": [],
 			"act": "assert",

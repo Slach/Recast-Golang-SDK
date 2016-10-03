@@ -93,6 +93,7 @@ func main() {
 The Response struct contains the following attributes:
 ```go
 type Response struct {
+	UUID      string
 	Source    string
 	Intents   []Intent
 	Act       string
@@ -165,7 +166,7 @@ Attributes can be accessed by the Get method which can be one of the following:
 * hex
 * value
 * deg
-* formated
+* formatted
 * lng
 * lat
 * unit

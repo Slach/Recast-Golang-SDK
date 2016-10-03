@@ -29,6 +29,7 @@ const (
 
 // Response is the HTTP response from the Recast API
 type Response struct {
+	UUID      string              `json:"uuid"`
 	Source    string              `json:"source"`
 	Intents   []Intent            `json:"intents"`
 	Act       string              `json:"act"`

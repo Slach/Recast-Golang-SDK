@@ -228,6 +228,7 @@ func getBadRequestFormatJSONResponse() string {
 func getBadFormatJSONResponse() string {
 	return `{
    "results":{
+	  "uuid": "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f",
       "source":"WhatistheweatherinLondontomorrow?AndinParis?",
       "intents":[
          {
@@ -241,6 +242,7 @@ func getBadFormatJSONResponse() string {
 func getSuccessfulJSONResponse() string {
 	return `{
    "results":{
+	   "uuid": "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f",
       "source":"WhatistheweatherinLondontomorrow?AndinParis?",
       "intents":[
          {
