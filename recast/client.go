@@ -76,7 +76,6 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 	}
 
 	var send forms
-//	form := url.Values{}
 	send.text = text
 	if lang != "" {
 		send.language = lang
