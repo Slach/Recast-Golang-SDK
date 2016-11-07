@@ -7,10 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
-	"net/http"
-	"net/url"
 	"os"
-	"strings"
+	"github.com/parnurzeal/gorequest"
 )
 
 const (
@@ -33,6 +31,10 @@ type Client struct {
 type ReqOpts struct {
 	Token    string
 	Language string
+}
+type forms struct {
+	text		 string `json:"text"`
+	language string	`json:"language"`
 }
 
 // NewClient returns a new Recast.Ai client
@@ -58,6 +60,7 @@ func (c *Client) SetLanguage(language string) {
 func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 	lang := c.language
 	token := c.token
+	gorequest := gorequest.New()
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language
@@ -72,18 +75,16 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		return Response{}, ErrTokenNotSet
 	}
 
-	form := url.Values{}
-	form.Add("text", text)
+	var send forms
+//	form := url.Values{}
+	send.text = text
 	if lang != "" {
-		form.Add("language", lang)
+		send.language = lang
 	}
 
-	req, _ := http.NewRequest("POST", APIEndpoint, strings.NewReader(form.Encode()))
-	req.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return Response{}, err
+	resp, _, err:= gorequest.Post(APIEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	if err[0] != nil {
+		return Response{}, err[0]
 	}
 
 	defer resp.Body.Close()
@@ -96,17 +97,17 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		Results *Response `json:"results"`
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Response{}, err
+	body, err1 := ioutil.ReadAll(resp.Body)
+	if err1 != nil {
+		return Response{}, err1
 	}
 	body2 := make([]byte, len(body))
 	copy(body2, body)
 
 	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return Response{}, err
+	err1 = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err1 != nil {
+		return Response{}, err1
 	}
 
 	type result struct {
@@ -116,9 +117,9 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 		Results *result `json:"results"`
 	}
 	var respStr respStruct
-	err = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
-	if err != nil {
-		return Response{}, err
+	err1 = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
+	if err1 != nil {
+		return Response{}, err1
 	}
 	r.Results.fillEntities(respStr.Results.Entities)
 
@@ -131,6 +132,8 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 	lang := c.language
 	token := c.token
+	gorequest := gorequest.New()
+
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language
@@ -186,29 +189,24 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 		return Response{}, err
 	}
 
-	request, err := http.NewRequest("POST", APIEndpoint, &body)
-	if err != nil {
-		return Response{}, err
+	request, _, err1:= gorequest.Post(APIEndpoint).Send(&body).Set("Authorization",fmt.Sprintf("Token %s", token)).Set("Content-Type", writer.FormDataContentType()).End()
+	if err1[0] != nil {
+		return Response{}, err1[0]
 	}
-
-	request.Header.Set("Authorization", fmt.Sprintf("Token %s", token))
-	request.Header.Set("Content-Type", writer.FormDataContentType())
-	client := &http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		return Response{}, err
+	if err1[0] != nil {
+		return Response{}, err1[0]
 	}
-	defer resp.Body.Close()
+	defer request.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
+	if request.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed: %s", request.Status)
 	}
 
 	type respJSON struct {
 		Results *Response `json:"results"`
 	}
 
-	body1, err := ioutil.ReadAll(resp.Body)
+	body1, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		return Response{}, err
 	}
