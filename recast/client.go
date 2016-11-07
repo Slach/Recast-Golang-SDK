@@ -6,9 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"mime/multipart"
-	"os"
 	"github.com/parnurzeal/gorequest"
+	"path/filepath"
 )
 
 const (
@@ -33,9 +32,9 @@ type ReqOpts struct {
 	Language string
 }
 type forms struct {
-	text		 string `json:"text"`
-	language string	`json:"language"`
-}
+		Text string `json:"text"`
+		Language string	`json:"language"`
+	}
 
 // NewClient returns a new Recast.Ai client
 // The token will be used to authenticate to Recast.AI API.
@@ -76,13 +75,12 @@ func (c *Client) TextRequest(text string, opts *ReqOpts) (Response, error) {
 	}
 
 	var send forms
-	send.text = text
+	send.Text = text
 	if lang != "" {
-		send.language = lang
+		send.Language = lang
 	}
-
 	resp, _, err:= gorequest.Post(APIEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
-	if err[0] != nil {
+	if err != nil {
 		return Response{}, err[0]
 	}
 
@@ -147,52 +145,30 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 		return Response{}, ErrTokenNotSet
 	}
 
-	file, err := os.Open(filename)
-	if err != nil {
-		return Response{}, err
-	}
-	defer file.Close()
-
-	fileContent, err := ioutil.ReadAll(file)
+	file, err := filepath.Abs(filename)
 	if err != nil {
 		return Response{}, err
 	}
 
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-
-	filePart, err := writer.CreateFormFile("voice", file.Name())
+	fileContent, err := ioutil.ReadFile(file)
 	if err != nil {
 		return Response{}, err
 	}
 
-	_, err = filePart.Write(fileContent)
-	if err != nil {
-		return Response{}, err
-	}
-
+ var send forms
 	if lang != "" {
-		langPart, err := writer.CreateFormField("language")
-		if err != nil {
-			return Response{}, err
-		}
-
-		_, err = langPart.Write([]byte(lang))
-		if err != nil {
-			return Response{}, err
-		}
+		send.Language = lang
 	}
 
-	err = writer.Close()
-	if err != nil {
-		return Response{}, err
-	}
-
-	request, _, err1:= gorequest.Post(APIEndpoint).Send(&body).Set("Authorization",fmt.Sprintf("Token %s", token)).Set("Content-Type", writer.FormDataContentType()).End()
-	if err1[0] != nil {
+	request, _, err1:= gorequest.Post(APIEndpoint).
+	Type("multipart").
+	SendFile(fileContent, "filename", "voice").
+	Send(send).
+	Set("Authorization",fmt.Sprintf("Token %s", token)).End()
+	if err1 != nil {
 		return Response{}, err1[0]
 	}
-	if err1[0] != nil {
+	if err1 != nil {
 		return Response{}, err1[0]
 	}
 	defer request.Body.Close()
@@ -200,7 +176,6 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 	if request.StatusCode != 200 {
 		return Response{}, fmt.Errorf("Request failed: %s", request.Status)
 	}
-
 	type respJSON struct {
 		Results *Response `json:"results"`
 	}
