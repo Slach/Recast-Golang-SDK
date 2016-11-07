@@ -75,11 +75,11 @@ import "github.com/RecastAI/SDK-Golang/recast"
 
 func main() {
     var client *recast.Client
-    var response *recast.Response
+    var response recast.Response
 
     client = &recast.Client{}
 
-    response, err := client.FileRequest(YOUR_VOICE_FILE, recast.ReqOpts{
+    response, err := client.FileRequest(YOUR_VOICE_FILE, &recast.ReqOpts{
 		Token: YOUR_TOKEN,
 		Language: "en",
 	})
