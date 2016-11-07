@@ -32,9 +32,9 @@ type ReqOpts struct {
 	Language string
 }
 type forms struct {
-		Text string `json:"text"`
-		Language string	`json:"language"`
-	}
+	Text string `json:"text"`
+	Language string	`json:"language"`
+}
 
 // NewClient returns a new Recast.Ai client
 // The token will be used to authenticate to Recast.AI API.
@@ -155,7 +155,7 @@ func (c *Client) FileRequest(filename string, opts *ReqOpts) (Response, error) {
 		return Response{}, err
 	}
 
- var send forms
+	var send forms
 	if lang != "" {
 		send.Language = lang
 	}
