@@ -1,222 +1,222 @@
 package recast
 
 type Cardinal struct {
-	Bearing    float64
-	Raw        string
-	confidence float64
+	Bearing    float64 `json:"bearing"`
+	Raw        string  `json:"raw"`
+	confidence float64 `json:"confidence"`
 }
 
 type Color struct {
-	Rgb        string
-	Hex        string
-	Raw        string
-	Confidence float64
+	Rgb        string  `json:"rgb"`
+	Hex        string  `json:"hex"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Datetime struct {
-	Formatted  string
-	Iso        string
-	Accuracy   string
-	Chronology string
-	Raw        string
-	Confidence float64
+	Formatted  string  `json:"formatted"`
+	Iso        string  `json:"iso"`
+	Accuracy   string  `json:"accuracy"`
+	Chronology string  `json:"chronology"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Distance struct {
-	Scalar     float64
-	Unit       string
-	Meters     float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Meters     float64 `json:"meters"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Duration struct {
-	Chrono     string
-	Years      float64
-	Months     float64
-	Days       float64
-	Hours      float64
-	Minutes    float64
-	Seconds    float64
-	Raw        string
-	Confidence float64
+	Chrono     string  `json:"chrono"`
+	Years      float64 `json:"years"`
+	Months     float64 `json:"months"`
+	Days       float64 `json:"days"`
+	Hours      float64 `json:"hours"`
+	Minutes    float64 `json:"minutes"`
+	Seconds    float64 `json:"seconds"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Email struct {
-	Local      string
-	Tag        string
-	Domain     string
-	Raw        string
-	Confidence string
+	Local      string `json:"local"`
+	Tag        string `json:"tag"`
+	Domain     string `json:"domain"`
+	Raw        string `json:"raw"`
+	Confidence string `json:"confidence"`
 }
 
 type Emoji struct {
-	Formatted   string
-	Feeling     string
-	Tags        []string
-	Unicode     string
-	Description string
-	Raw         string
-	Confidence  float64
+	Formatted   string   `json:"formatted"`
+	Feeling     string   `json:"feeling"`
+	Tags        []string `json:"tags"`
+	Unicode     string   `json:"unicode"`
+	Description string   `json:"description"`
+	Raw         string   `json:"raw"`
+	Confidence  float64  `json:"confidence"`
 }
 
 type Ip struct {
-	Formatted  string
-	Lat        float64
-	Lng        float64
-	Raw        string
-	Confidence float64
+	Formatted  string  `json:"formatted"`
+	Lat        float64 `json:"lat"`
+	Lng        float64 `json:"lng"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Interval struct {
-	Begin           string
-	End             string
-	BeginChronology string
-	EndChronology   string
-	BeginAccuracy   string
-	EndAccuracy     string
-	Timespan        float64
-	Raw             string
-	Confidence      float64
+	Begin           string  `json:"begin"`
+	End             string  `json:"end"`
+	BeginChronology string  `json:"begin_chronology"`
+	EndChronology   string  `json:"end_chronology"`
+	BeginAccuracy   string  `json:"begin_accuracy"`
+	EndAccuracy     string  `json:"end_accuracy"`
+	Timespan        float64 `json:"timespan"`
+	Raw             string  `json:"raw"`
+	Confidence      float64 `json:"confidence"`
 }
 
 type Job struct {
-	Raw        string
-	Confidence float64
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Language struct {
-	Short      string
-	Long       string
-	Raw        string
-	Confidence string
+	Short      string `json:"short"`
+	Long       string `json:"long"`
+	Raw        string `json:"raw"`
+	Confidence string `json:"confidence"`
 }
 
 type Location struct {
-	Formatted  string
-	Lat        float64
-	Lng        float64
-	Place      string
-	Type       float64
-	Raw        string
-	Confidence float64
+	Formatted  string  `json:"formatted"`
+	Lat        float64 `json:"lat"`
+	Lng        float64 `json:"lng"`
+	Place      string  `json:"place"`
+	Type       float64 `json:"type"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Mass struct {
-	Scalar     float64
-	Unit       string
-	Grams      float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Grams      float64 `json:"grams"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Money struct {
-	Amount     float64
-	Currency   string
-	Dollars    float64
-	Raw        string
-	Confidence string
+	Amount     float64 `json:"amount"`
+	Currency   string  `json:"currency"`
+	Dollars    float64 `json:"dollars"`
+	Raw        string  `json:"raw"`
+	Confidence string  `json:"confidence"`
 }
 
 type Nationality struct {
-	Short      string
-	Long       string
-	Country    string
-	Raw        string
-	Confidence float64
+	Short      string  `json:"short"`
+	Long       string  `json:"long"`
+	Country    string  `json:"country"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Number struct {
-	Scalar     float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Ordinal struct {
-	Rank       int32
-	Raw        string
-	Confidence float64
+	Rank       int32   `json:"rank"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Organization struct {
-	Raw        string
-	Confidence float64
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Percent struct {
-	Scalar     float64
-	Unit       string
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Person struct {
-	Fullname   string
-	Raw        string
-	Confidence float64
+	Fullname   string  `json:"fullname"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Phone struct {
-	Number     string
-	Raw        string
-	Confidence float64
+	Number     string  `json:"number"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Pronoun struct {
-	Person     int32
-	Number     string
-	Gender     string
-	Raw        string
-	Confidence float64
+	Person     int32   `json:"person"`
+	Number     string  `json:"number"`
+	Gender     string  `json:"gender"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Set struct {
-	Next       string
-	Frequency  string
-	Interval   string
-	Rrule      string
-	Raw        string
-	Confidence float64
+	Next       string  `json:"next"`
+	Frequency  string  `json:"frequency"`
+	Interval   string  `json:"interval"`
+	Rrule      string  `json:"rrule"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Sort struct {
-	Order      string
-	Criterion  string
-	Raw        string
-	Confidence float64
+	Order      string  `json:"order"`
+	Criterion  string  `json:"criterion"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Speed struct {
-	Scalar     float64
-	Unit       string
-	Mps        float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Mps        float64 `json:"mps"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Temperature struct {
-	Scalar     float64
-	Unit       string
-	Celsius    float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Celsius    float64 `json:"celsius"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Url struct {
-	Scheme     string
-	Host       string
-	Path       string
-	Param      string
-	Query      string
-	Fragment   string
-	Raw        string
-	Confidence float64
+	Scheme     string  `json:"scheme"`
+	Host       string  `json:"host"`
+	Path       string  `json:"path"`
+	Param      string  `json:"param"`
+	Query      string  `json:"query"`
+	Fragment   string  `json:"fragment"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Volume struct {
-	Scalar     float64
-	Unit       string
-	Liters     float64
-	Raw        string
-	Confidence float64
+	Scalar     float64 `json:"scalar"`
+	Unit       string  `json:"unit"`
+	Liters     float64 `json:"liters"`
+	Raw        string  `json:"raw"`
+	Confidence float64 `json:"confidence"`
 }
