@@ -7,19 +7,48 @@ import (
 	"time"
 )
 
+type Entities struct {
+	Cardinal     []Cardinal     `json:"cardinal "`
+	Color        []Color        `json:"color "`
+	Datetime     []Datetime     `json:"datetime "`
+	Distance     []Distance     `json:"distance "`
+	Duration     []Duration     `json:"duration "`
+	Email        []Email        `json:"email "`
+	Emoji        []Emoji        `json:"emoji "`
+	Ip           []Ip           `json:"ip "`
+	Interval     []Interval     `json:"interval "`
+	Job          []Job          `json:"job "`
+	Language     []Language     `json:"language "`
+	Location     []Location     `json:"location "`
+	Mass         []Mass         `json:"mass "`
+	Money        []Money        `json:"money "`
+	Nationality  []Nationality  `json:"nationality "`
+	Number       []Number       `json:"number "`
+	Ordinal      []Ordinal      `json:"ordinal "`
+	Organization []Organization `json:"organization "`
+	Percent      []Percent      `json:"percent "`
+	Person       []Person       `json:"person "`
+	Phone        []Phone        `json:"phone "`
+	Pronoun      []Pronoun      `json:"pronoun "`
+	Set          []Set          `json:"set "`
+	Sort         []Sort         `json:"sort "`
+	Speed        []Speed        `json:"speed "`
+	Temperature  []Temperature  `json:"temperature "`
+}
+
 // Response is the HTTP response from the Recast API
 type Response struct {
-	UUID      string              `json:"uuid"`
-	Source    string              `json:"source"`
-	Intents   []Intent            `json:"intents"`
-	Act       string              `json:"act"`
-	Type      string              `json:"type"`
-	Sentiment string              `json:"sentiment"`
-	Entities  map[string][]Entity `json:"entities"`
-	Language  string              `json:"language"`
-	Version   string              `json:"version"`
-	Timestamp time.Time           `json:"timestamp"`
-	Status    int                 `json:"status"`
+	UUID      string    `json:"uuid"`
+	Source    string    `json:"source"`
+	Intents   []Intent  `json:"intents"`
+	Act       string    `json:"act"`
+	Type      string    `json:"type"`
+	Sentiment string    `json:"sentiment"`
+	Entities  Entities  `json:"entities"`
+	Language  string    `json:"language"`
+	Version   string    `json:"version"`
+	Timestamp time.Time `json:"timestamp"`
+	Status    int       `json:"status"`
 }
 
 func (r *Response) fillEntities(data map[string]interface{}) {
