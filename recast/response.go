@@ -2,7 +2,6 @@ package recast
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"time"
 )
@@ -49,36 +48,6 @@ type Response struct {
 	Version   string    `json:"version"`
 	Timestamp time.Time `json:"timestamp"`
 	Status    int       `json:"status"`
-}
-
-func (r *Response) fillEntities(data map[string]interface{}) {
-	r.Entities = make(map[string][]Entity)
-	for k, v := range data {
-		ents, ok := v.([]interface{})
-		if !ok {
-			return
-		}
-		for _, ent := range ents {
-			entityData, ok := ent.(map[string]interface{})
-			if !ok {
-				return
-			}
-			r.Entities[k] = append(r.Entities[k], newEntity(k, entityData))
-		}
-	}
-}
-
-// All returns all the entities matching `name` or nil if not present
-func (r Response) All(name string) []Entity {
-	return r.Entities[name]
-}
-
-// Get returns the first entity matching `name` or an error if not present
-func (r Response) Get(name string) (Entity, error) {
-	if r.Entities[name] != nil && len(r.Entities[name]) > 0 {
-		return r.Entities[name][0], nil
-	}
-	return Entity{}, fmt.Errorf("No entity matching %s found", name)
 }
 
 func (r Response) isType(exp string) bool {
