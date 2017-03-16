@@ -7,26 +7,6 @@ import (
 	"time"
 )
 
-const (
-	ActAssert  = "assert"
-	ActCommand = "command"
-	ActWhQuery = "wh-query"
-	ActYnQuery = "yn-query"
-
-	TypeAbbreviation = "abbr:"
-	TypeEntity       = "enty:"
-	TypeDescription  = "desc:"
-	TypeHuman        = "hum:"
-	TypeLocation     = "loc:"
-	TypeNumber       = "num:"
-
-	SentimentPositive     = "positive"
-	SentimentVeryPositive = "vpositive"
-	SentimentNegative     = "negative"
-	SentimentVeryNegative = "vnegative"
-	SentimentNeutral      = "neutral"
-)
-
 // Response is the HTTP response from the Recast API
 type Response struct {
 	UUID      string              `json:"uuid"`
