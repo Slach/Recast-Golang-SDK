@@ -7,32 +7,32 @@ import (
 )
 
 type Entities struct {
-	Cardinal     []Cardinal     `json:"cardinal "`
-	Color        []Color        `json:"color "`
-	Datetime     []Datetime     `json:"datetime "`
-	Distance     []Distance     `json:"distance "`
-	Duration     []Duration     `json:"duration "`
-	Email        []Email        `json:"email "`
-	Emoji        []Emoji        `json:"emoji "`
-	Ip           []Ip           `json:"ip "`
-	Interval     []Interval     `json:"interval "`
-	Job          []Job          `json:"job "`
-	Language     []Language     `json:"language "`
-	Location     []Location     `json:"location "`
-	Mass         []Mass         `json:"mass "`
-	Money        []Money        `json:"money "`
-	Nationality  []Nationality  `json:"nationality "`
-	Number       []Number       `json:"number "`
-	Ordinal      []Ordinal      `json:"ordinal "`
-	Organization []Organization `json:"organization "`
-	Percent      []Percent      `json:"percent "`
-	Person       []Person       `json:"person "`
-	Phone        []Phone        `json:"phone "`
-	Pronoun      []Pronoun      `json:"pronoun "`
-	Set          []Set          `json:"set "`
-	Sort         []Sort         `json:"sort "`
-	Speed        []Speed        `json:"speed "`
-	Temperature  []Temperature  `json:"temperature "`
+	Cardinal     []Cardinal     `json:"cardinal"`
+	Color        []Color        `json:"color"`
+	Datetime     []Datetime     `json:"datetime"`
+	Distance     []Distance     `json:"distance"`
+	Duration     []Duration     `json:"duration"`
+	Email        []Email        `json:"email"`
+	Emoji        []Emoji        `json:"emoji"`
+	Ip           []Ip           `json:"ip"`
+	Interval     []Interval     `json:"interval"`
+	Job          []Job          `json:"job"`
+	Language     []Language     `json:"language"`
+	Location     []Location     `json:"location"`
+	Mass         []Mass         `json:"mass"`
+	Money        []Money        `json:"money"`
+	Nationality  []Nationality  `json:"nationality"`
+	Number       []Number       `json:"number"`
+	Ordinal      []Ordinal      `json:"ordinal"`
+	Organization []Organization `json:"organization"`
+	Percent      []Percent      `json:"percent"`
+	Person       []Person       `json:"person"`
+	Phone        []Phone        `json:"phone"`
+	Pronoun      []Pronoun      `json:"pronoun"`
+	Set          []Set          `json:"set"`
+	Sort         []Sort         `json:"sort"`
+	Speed        []Speed        `json:"speed"`
+	Temperature  []Temperature  `json:"temperature"`
 }
 
 // Response is the HTTP response from the Recast API

@@ -4,7 +4,7 @@ const (
 	TrainEndpoint   string = "https://api.recast.ai/v2"
 	ConnectEndpoint string = "https://api.recast.ai/connect/v1"
 	HostEndpoint    string = "https://api.recast.ai/host/v1"
-	RequestEndpoint string = "https://api.recast.ai/v2"
+	RequestEndpoint string = "https://api.recast.ai/v2/request"
 	MonitorEndpoint string = "https://api.recast.ai/monitor/v1"
 
 	ActAssert  = "assert"

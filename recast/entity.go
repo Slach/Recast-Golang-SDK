@@ -97,7 +97,7 @@ type Location struct {
 	Lat        float64 `json:"lat"`
 	Lng        float64 `json:"lng"`
 	Place      string  `json:"place"`
-	Type       float64 `json:"type"`
+	Type       string  `json:"type"`
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
