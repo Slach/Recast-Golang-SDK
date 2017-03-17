@@ -64,9 +64,9 @@ func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error
 	if lang != "" {
 		send.Language = lang
 	}
-	resp, _, err := gorequest.Post(RequestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
-	if err != nil {
-		return Response{}, err[0]
+	resp, _, requestErr := gorequest.Post(RequestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	if requestErr != nil {
+		return Response{}, requestErr[0]
 	}
 
 	defer resp.Body.Close()
