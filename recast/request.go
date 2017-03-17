@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/parnurzeal/gorequest"
 )
@@ -80,6 +81,74 @@ func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Response{}, err
+	}
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return Response{}, err
+	}
+
+	return *r.Results, nil
+}
+
+// FileRequest handles voice file request to Recast.Ai and returns a Response
+// TextRequest process a text request to Recast.AI API and returns a Response
+// opts is a map of parameters used for the request. Two parameters can be provided: "token" and "language". They will be used instead of the client token and language.
+func (c *RequestClient) FileRequest(filename string, opts *ReqOpts) (Response, error) {
+	lang := c.Language
+	token := c.Token
+	gorequest := gorequest.New()
+
+	if opts != nil {
+		if opts.Language != "" {
+			lang = opts.Language
+		}
+
+		if opts.Token != "" {
+			token = opts.Token
+		}
+	}
+
+	if token == "" {
+		return Response{}, ErrTokenNotSet
+	}
+
+	file, err := filepath.Abs(filename)
+	if err != nil {
+		return Response{}, err
+	}
+
+	fileContent, err := ioutil.ReadFile(file)
+	if err != nil {
+		return Response{}, err
+	}
+
+	var send forms
+	if lang != "" {
+		send.Language = lang
+	}
+
+	request, _, err1 := gorequest.Post(RequestEndpoint).
+		Type("multipart").
+		SendFile(fileContent, "filename", "voice").
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	if err1 != nil {
+		return Response{}, err1[0]
+	}
+	defer request.Body.Close()
+
+	if request.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed: %s", request.Status)
+	}
+	type respJSON struct {
+		Results *Response `json:"results"`
+	}
+
+	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		return Response{}, err
 	}
