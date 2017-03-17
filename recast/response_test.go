@@ -14,7 +14,7 @@ func expect(truth bool, t *testing.T, msg string) {
 }
 
 func TestResponseWithNoIntents(t *testing.T) {
-	testClient := Client{
+	testClient := RequestClient{
 		token:    "mocktoken",
 		language: "en",
 	}
@@ -39,7 +39,7 @@ func TestResponseWithNoIntents(t *testing.T) {
 }
 
 func TestResponseHelpers(t *testing.T) {
-	testClient := Client{
+	testClient := RequestClient{
 		token:    "mocktoken",
 		language: "en",
 	}
@@ -86,22 +86,6 @@ func TestResponseHelpers(t *testing.T) {
 	expect(err == nil, t, "Should find an intent")
 	expect(intent.Slug == "weather", t, "Should have the right slug")
 	expect(intent.Confidence == 0.67, t, "Should have the right confidence")
-
-	locations := r.All("location")
-	expect(locations != nil, t, "Should be locations in the sentence")
-	expect(len(locations) == 2, t, "Should find 2 location entities")
-
-	location, err := r.Get("location")
-	expect(err == nil, t, "Should find a location")
-	expect(location.Confidence == locations[0].Confidence, t, "Get should return the first entity")
-	expect(location.Name == locations[0].Name, t, "Get should return the first entity")
-
-	_, err = r.Get("datetime")
-	expect(err == nil, t, "Should find a date")
-
-	_, err = r.Get("fake_entity")
-	expect(err != nil, t, "Should not find fake_entity")
-	expect(err.Error() == "No entity matching fake_entity found", t, "Should have a correct error message")
 }
 
 func getSuccessNoIntentJSONResponse() string {
