@@ -34,7 +34,7 @@ type forms struct {
 // NewClient returns a new Recast.Ai client
 // The token will be used to authenticate to Recast.AI API.
 // The language, if provided will define the mlanguage of the inputs sent to Recast.AI, to use the automatic language detection, an empty string must be provided.
-func NewRequestClient(token string, language string) *Client {
+func NewRequestClient(token string, language string) *RequestClient {
 	return &RequestClient{Token: token, Language: language}
 }
 
@@ -42,8 +42,8 @@ func NewRequestClient(token string, language string) *Client {
 // opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
 // Set opts to nil if you want the request to use your default client token and language
 func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error) {
-	lang := c.language
-	token := c.token
+	lang := c.Language
+	token := c.Token
 	gorequest := gorequest.New()
 	if opts != nil {
 		if opts.Language != "" {
@@ -64,7 +64,7 @@ func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error
 	if lang != "" {
 		send.Language = lang
 	}
-	resp, _, err := gorequest.Post(APIEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	resp, _, err := gorequest.Post(RequestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
 	if err != nil {
 		return Response{}, err[0]
 	}
@@ -79,31 +79,16 @@ func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error
 		Results *Response `json:"results"`
 	}
 
-	body, err1 := ioutil.ReadAll(resp.Body)
-	if err1 != nil {
-		return Response{}, err1
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Response{}, err
 	}
-	body2 := make([]byte, len(body))
-	copy(body2, body)
 
 	var r respJSON
-	err1 = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err1 != nil {
-		return Response{}, err1
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return Response{}, err
 	}
-
-	type result struct {
-		Entities map[string]interface{} `json:"entities"`
-	}
-	type respStruct struct {
-		Results *result `json:"results"`
-	}
-	var respStr respStruct
-	err1 = json.NewDecoder(bytes.NewBuffer(body2)).Decode(&respStr)
-	if err1 != nil {
-		return Response{}, err1
-	}
-	r.Results.fillEntities(respStr.Results.Entities)
 
 	return *r.Results, nil
 }
