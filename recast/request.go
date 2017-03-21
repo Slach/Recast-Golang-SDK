@@ -237,5 +237,8 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		return Conversation{}, err
 	}
 
-	return *r.Results, nil
+	conversation := *r.Results
+	conversation.AuthorizationToken = token
+
+	return conversation, nil
 }
