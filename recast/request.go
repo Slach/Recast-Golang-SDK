@@ -163,23 +163,23 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 
 type ConverseOpts struct {
 	ConversationToken string
-	Memory            string
+	Memory            map[string]map[string]interface{}
 	Language          string
 	Token             string
 }
 
 type requestForms struct {
-	ConversationToken string `json:"conversation_token"`
-	Memory            string `json:"memory"`
-	Language          string `json:"language"`
-	Text              string `json:"text"`
+	ConversationToken string                            `json:"conversation_token"`
+	Memory            map[string]map[string]interface{} `json:"memory"`
+	Language          string                            `json:"language"`
+	Text              string                            `json:"text"`
 }
 
 // ConverseText processes a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
 // Set opts to nil if you want the request to use your default client token and language
 func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversation, error) {
-	var memory string
+	var memory map[string]map[string]interface{}
 	var conversationToken string
 	lang := c.Language
 	token := c.Token
