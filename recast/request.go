@@ -160,3 +160,82 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 
 	return *r.Results, nil
 }
+
+type ConverseOpts struct {
+	ConversationToken string
+	Memory            string
+	Language          string
+	Token             string
+}
+
+type requestForms struct {
+	ConversationToken string `json:"conversation_token"`
+	Memory            string `json:"memory"`
+	Language          string `json:"language"`
+	Text              string `json:"text"`
+}
+
+// ConverseText processes a text request to Recast.AI API and returns a Response
+// opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
+// Set opts to nil if you want the request to use your default client token and language
+func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversation, error) {
+	var memory string
+	var conversationToken string
+	lang := c.Language
+	token := c.Token
+
+	gorequest := gorequest.New()
+	if opts != nil {
+		if opts.Language != "" {
+			lang = opts.Language
+		}
+		if opts.Token != "" {
+			token = opts.Token
+		}
+		if opts.ConversationToken != "" {
+			conversationToken = opts.ConversationToken
+		}
+		if opts.ConversationToken != "" {
+			memory = opts.Memory
+		}
+	}
+
+	if token == "" {
+		return Conversation{}, ErrTokenNotSet
+	}
+
+	send := requestForms{
+		Text:              text,
+		Memory:            memory,
+		ConversationToken: conversationToken,
+		Language:          lang,
+	}
+
+	resp, _, requestErr := gorequest.Post(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	if requestErr != nil {
+		return Conversation{}, requestErr[0]
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return Conversation{}, fmt.Errorf("Request failed: %s", resp.Status)
+	}
+
+	type respJSON struct {
+		Results *Conversation `json:"results"`
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return Conversation{}, err
+	}
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return Conversation{}, err
+	}
+
+	return *r.Results, nil
+}
