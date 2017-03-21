@@ -39,10 +39,10 @@ func NewRequestClient(token string, language string) *RequestClient {
 	return &RequestClient{Token: token, Language: language}
 }
 
-// TextRequest process a text request to Recast.AI API and returns a Response
+// AnalyzeText processes a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
 // Set opts to nil if you want the request to use your default client token and language
-func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error) {
+func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
 	gorequest := gorequest.New()
@@ -94,10 +94,9 @@ func (c *RequestClient) TextRequest(text string, opts *ReqOpts) (Response, error
 	return *r.Results, nil
 }
 
-// FileRequest handles voice file request to Recast.Ai and returns a Response
-// TextRequest process a text request to Recast.AI API and returns a Response
+// AnalyzeFile handles voice file request to Recast.Ai and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: "token" and "language". They will be used instead of the client token and language.
-func (c *RequestClient) FileRequest(filename string, opts *ReqOpts) (Response, error) {
+func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
 	gorequest := gorequest.New()
