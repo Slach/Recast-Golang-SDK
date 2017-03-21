@@ -34,11 +34,11 @@ type Conversation struct {
 }
 
 type setMemoryForms struct {
-	Memory            string `json:"memory"`
-	ConversationToken string `json:"conversation_token"`
+	Memory            map[string]map[string]interface{} `json:"memory"`
+	ConversationToken string                            `json:"conversation_token"`
 }
 
-func (conv *Conversation) SetMemory(memory string) error {
+func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) error {
 	gorequest := gorequest.New()
 
 	send := setMemoryForms{
