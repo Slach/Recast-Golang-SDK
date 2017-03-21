@@ -46,7 +46,7 @@ func (conv *Conversation) SetMemory(memory string) error {
 		ConversationToken: conv.ConversationToken,
 	}
 
-	resp, _, requestErr := gorequest.Post(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+	resp, _, requestErr := gorequest.Put(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
 	if requestErr != nil {
 		return requestErr[0]
 	}
@@ -71,6 +71,23 @@ func (conv *Conversation) SetMemory(memory string) error {
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Request failed(%s): %s", resp.Status, r.Message)
+	}
+
+	return nil
+}
+
+type resetMemoryForms struct {
+	ConversationToken string `json:"conversation_token"`
+}
+
+func (conv *Conversation) Reset() error {
+	send := resetMemoryForms{conv.ConversationToken}
+
+	gorequest := gorequest.New()
+	_, _, requestErr := gorequest.Delete(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+
+	if requestErr != nil {
+		return requestErr[0]
 	}
 
 	return nil
