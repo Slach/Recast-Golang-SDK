@@ -65,7 +65,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	if lang != "" {
 		send.Language = lang
 	}
-	resp, _, requestErr := gorequest.Post(RequestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	resp, _, requestErr := gorequest.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
 	if requestErr != nil {
 		return Response{}, requestErr[0]
 	}
@@ -131,7 +131,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		send.Language = lang
 	}
 
-	resp, _, requestErr := gorequest.Post(RequestEndpoint).
+	resp, _, requestErr := gorequest.Post(requestEndpoint).
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
@@ -214,7 +214,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		Language:          lang,
 	}
 
-	resp, _, requestErr := gorequest.Post(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	resp, _, requestErr := gorequest.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
 	if requestErr != nil {
 		return Conversation{}, requestErr[0]
 	}

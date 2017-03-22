@@ -1,12 +1,12 @@
 package recast
 
 const (
-	TrainEndpoint    string = "https://api.recast.ai/v2/"
-	ConnectEndpoint  string = "https://api.recast.ai/connect/v1/"
-	HostEndpoint     string = "https://api.recast.ai/host/v1/"
-	RequestEndpoint  string = "https://api-development.recast.ai/v2/request/"
-	ConverseEndpoint string = "https://api-development.recast.ai/v2/converse/"
-	MonitorEndpoint  string = "https://api.recast.ai/monitor/v1/"
+	trainEndpoint    string = "https://api.recast.ai/v2/"
+	connectEndpoint  string = "https://api.recast.ai/connect/v1/"
+	hostEndpoint     string = "https://api.recast.ai/host/v1/"
+	requestEndpoint  string = "https://api-development.recast.ai/v2/request/"
+	converseEndpoint string = "https://api-development.recast.ai/v2/converse/"
+	monitorEndpoint  string = "https://api.recast.ai/monitor/v1/"
 
 	ActAssert  = "assert"
 	ActCommand = "command"
