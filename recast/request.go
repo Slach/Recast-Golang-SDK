@@ -72,12 +72,9 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return Response{}, fmt.Errorf("Request failed: %s", resp.Status)
-	}
-
 	type respJSON struct {
 		Results *Response `json:"results"`
+		Message string    `json:"message"`
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -89,6 +86,10 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
 	if err != nil {
 		return Response{}, err
+	}
+
+	if resp.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
 	}
 
 	return *r.Results, nil
@@ -130,24 +131,22 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		send.Language = lang
 	}
 
-	request, _, err1 := gorequest.Post(RequestEndpoint).
+	resp, _, requestErr := gorequest.Post(RequestEndpoint).
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).End()
-	if err1 != nil {
-		return Response{}, err1[0]
+	if requestErr != nil {
+		return Response{}, requestErr[0]
 	}
-	defer request.Body.Close()
+	defer resp.Body.Close()
 
-	if request.StatusCode != 200 {
-		return Response{}, fmt.Errorf("Request failed: %s", request.Status)
-	}
 	type respJSON struct {
 		Results *Response `json:"results"`
+		Message string    `json:"results"`
 	}
 
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return Response{}, err
 	}
@@ -156,6 +155,10 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
 	if err != nil {
 		return Response{}, err
+	}
+
+	if resp.StatusCode != 200 {
+		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
 	}
 
 	return *r.Results, nil
@@ -218,12 +221,9 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return Conversation{}, fmt.Errorf("Request failed: %s", resp.Status)
-	}
-
 	type respJSON struct {
 		Results *Conversation `json:"results"`
+		Message string        `json:"string"`
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -235,6 +235,10 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
 	if err != nil {
 		return Conversation{}, err
+	}
+
+	if resp.StatusCode != 200 {
+		return Conversation{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
 	}
 
 	conversation := *r.Results
