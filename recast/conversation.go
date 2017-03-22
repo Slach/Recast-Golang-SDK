@@ -84,10 +84,29 @@ func (conv *Conversation) Reset() error {
 	send := resetMemoryForms{conv.ConversationToken}
 
 	gorequest := gorequest.New()
-	_, _, requestErr := gorequest.Delete(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+	resp, _, requestErr := gorequest.Delete(ConverseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
 
 	if requestErr != nil {
 		return requestErr[0]
+	}
+
+	type respJSON struct {
+		Message string `json:"message"`
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var r respJSON
+	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Request failed(%s): %s", resp.Status, r.Message)
 	}
 
 	return nil
