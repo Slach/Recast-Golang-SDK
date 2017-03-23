@@ -1,10 +1,7 @@
 package recast
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 )
 
 const (
@@ -41,27 +38,20 @@ func (client *ConnectClient) SendMessage(conversationId string, messages []Attac
 		Messages []Attachment `json:"messages"`
 	}{messages}
 
-	resp, _, requestErr := httpClient.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
+	var response struct {
+		Message string
+	}
+
+	resp, _, requestErr := httpClient.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).EndStruct(&response)
+
 	if requestErr != nil {
 		return requestErr[0]
 	}
 
 	defer resp.Body.Close()
-	var res struct {
-		Message string
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&res); err != nil {
-		return err
-	}
 
 	if resp.StatusCode != 201 {
-		return fmt.Errorf("Request failed (%s): %s", resp.Status, res.Message)
+		return fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
 	return nil
@@ -73,27 +63,21 @@ func (client *ConnectClient) BroadcastMessage(messages []Message) error {
 	send := struct {
 		Messages []Message `json:"messages"`
 	}{messages}
-	resp, _, requestErr := httpClient.Post(messagesEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
+
+	var response struct {
+		Message string
+	}
+
+	resp, _, requestErr := httpClient.Post(messagesEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).EndStruct(&response)
+
 	if requestErr != nil {
 		return requestErr[0]
 	}
 
 	defer resp.Body.Close()
-	var res struct {
-		Message string
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&res); err != nil {
-		return err
-	}
 
 	if resp.StatusCode != 201 {
-		return fmt.Errorf("Request failed (%s): %s", resp.Status, res.Message)
+		return fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
 	return nil

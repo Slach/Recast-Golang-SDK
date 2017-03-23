@@ -1,10 +1,7 @@
 package recast
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"time"
 )
 
@@ -44,31 +41,20 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 		ConversationToken: conv.ConversationToken,
 	}
 
-	resp, _, requestErr := httpClient.Put(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
-	if requestErr != nil {
-		return requestErr[0]
-	}
-
-	defer resp.Body.Close()
-
-	type respJSON struct {
+	var response struct {
 		Results *Conversation `json:"results"`
 		Message string        `json:"message"`
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
+	resp, _, requestErr := httpClient.Put(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).EndStruct(&response)
 
-	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return err
+	if requestErr != nil {
+		return requestErr[0]
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Request failed(%s): %s", resp.Status, r.Message)
+		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
 	}
 
 	return nil
@@ -82,29 +68,19 @@ func (conv *Conversation) Reset() error {
 	send := resetMemoryForms{conv.ConversationToken}
 
 	httpClient := newHttpWrapper()
-	resp, _, requestErr := httpClient.Delete(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+
+	var response struct {
+		Message string `json:"message"`
+	}
+
+	resp, _, requestErr := httpClient.Delete(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).EndStruct(&response)
 
 	if requestErr != nil {
 		return requestErr[0]
 	}
 
-	type respJSON struct {
-		Message string `json:"message"`
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return err
-	}
-
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Request failed(%s): %s", resp.Status, r.Message)
+		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
 	}
 
 	return nil

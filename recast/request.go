@@ -1,8 +1,6 @@
 package recast
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -63,34 +61,26 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	if lang != "" {
 		send.Language = lang
 	}
-	resp, _, requestErr := httpClient.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
-	if requestErr != nil {
-		return Response{}, requestErr[0]
-	}
-
-	defer resp.Body.Close()
 
 	type respJSON struct {
 		Results *Response `json:"results"`
 		Message string    `json:"message"`
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Response{}, err
-	}
+	var response respJSON
 
-	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return Response{}, err
+	resp, _, requestErr := httpClient.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
+
+	if requestErr != nil {
+		return Response{}, requestErr[0]
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
+		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	return *r.Results, nil
+	return *response.Results, nil
 }
 
 // AnalyzeFile handles voice file request to Recast.Ai and returns a Response
@@ -129,37 +119,27 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		send.Language = lang
 	}
 
+	var response struct {
+		Results *Response `json:"results"`
+		Message string    `json:"results"`
+	}
+
 	resp, _, requestErr := httpClient.Post(requestEndpoint).
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
-		Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+		Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
+
 	if requestErr != nil {
 		return Response{}, requestErr[0]
 	}
 	defer resp.Body.Close()
 
-	type respJSON struct {
-		Results *Response `json:"results"`
-		Message string    `json:"results"`
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Response{}, err
-	}
-
-	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return Response{}, err
-	}
-
 	if resp.StatusCode != 200 {
-		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
+		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	return *r.Results, nil
+	return *response.Results, nil
 }
 
 type ConverseOpts struct {
@@ -212,34 +192,23 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		Language:          lang,
 	}
 
-	resp, _, requestErr := httpClient.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
-	if requestErr != nil {
-		return Conversation{}, requestErr[0]
-	}
-
-	defer resp.Body.Close()
-
-	type respJSON struct {
+	var response struct {
 		Results *Conversation `json:"results"`
 		Message string        `json:"string"`
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return Conversation{}, err
-	}
+	resp, _, requestErr := httpClient.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
 
-	var r respJSON
-	err = json.NewDecoder(bytes.NewBuffer(body)).Decode(&r)
-	if err != nil {
-		return Conversation{}, err
+	if requestErr != nil {
+		return Conversation{}, requestErr[0]
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return Conversation{}, fmt.Errorf("Request failed (%s): %s", resp.Status, r.Message)
+		return Conversation{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	conversation := *r.Results
+	conversation := *response.Results
 	conversation.AuthorizationToken = token
 
 	return conversation, nil
