@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/parnurzeal/gorequest"
 )
 
 var (
@@ -41,7 +43,7 @@ func NewRequestClient(token string, language string) *RequestClient {
 func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language
@@ -88,7 +90,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 
 	if opts != nil {
 		if opts.Language != "" {
@@ -165,7 +167,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	lang := c.Language
 	token := c.Token
 
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language

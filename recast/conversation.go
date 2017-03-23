@@ -3,6 +3,8 @@ package recast
 import (
 	"fmt"
 	"time"
+
+	"github.com/parnurzeal/gorequest"
 )
 
 type Action struct {
@@ -34,7 +36,7 @@ type setMemoryForms struct {
 }
 
 func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) error {
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 
 	send := setMemoryForms{
 		Memory:            memory,
@@ -67,7 +69,7 @@ type resetMemoryForms struct {
 func (conv *Conversation) Reset() error {
 	send := resetMemoryForms{conv.ConversationToken}
 
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 
 	var response struct {
 		Message string `json:"message"`

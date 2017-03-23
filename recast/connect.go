@@ -2,6 +2,8 @@ package recast
 
 import (
 	"fmt"
+
+	"github.com/parnurzeal/gorequest"
 )
 
 const (
@@ -31,7 +33,7 @@ type ConnectClient struct {
 }
 
 func (client *ConnectClient) SendMessage(conversationId string, messages []Attachment) error {
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 	endpoint := conversationsEndpoint + conversationId + "/messages"
 
 	send := struct {
@@ -58,7 +60,7 @@ func (client *ConnectClient) SendMessage(conversationId string, messages []Attac
 }
 
 func (client *ConnectClient) BroadcastMessage(messages []Message) error {
-	httpClient := newHttpWrapper()
+	httpClient := gorequest.New()
 
 	send := struct {
 		Messages []Message `json:"messages"`
