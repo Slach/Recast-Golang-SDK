@@ -30,13 +30,6 @@ type forms struct {
 	Language string `json:"language"`
 }
 
-// NewClient returns a new Recast.Ai client
-// The token will be used to authenticate to Recast.AI API.
-// The language, if provided will define the mlanguage of the inputs sent to Recast.AI, to use the automatic language detection, an empty string must be provided.
-func NewRequestClient(token string, language string) *RequestClient {
-	return &RequestClient{Token: token, Language: language}
-}
-
 // AnalyzeText processes a text request to Recast.AI API and returns a Response
 // opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
 // Set opts to nil if you want the request to use your default client token and language

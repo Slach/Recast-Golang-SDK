@@ -4,7 +4,51 @@ func getBadRequestJSONResponse() string {
 	return `{"results":null,"message":"Request is invalid"}`
 }
 
-func getBadFormatRequestJSONResponse() string {
+func getServerErrorJSONResponse() string {
+	return `{"results":null,"message":"Internal server error"}`
+}
+
+func getSuccessfulConverseJSONResponse() string {
+	return `{
+		"results":{
+			"uuid": "390ff8ee-2909-4da4-bdae-15914ad2eacb",
+			"source": "projet",
+			"replies": [
+			"Quel est ton projet cette année ?"
+			],
+			"action": {
+				"slug": "projet",
+				"done": false,
+				"reply": "Quel est ton projet cette année ?"
+			},
+			"next_actions": [],
+			"memory": {
+				"secteur-boite": null,
+				"password": null,
+				"email": null,
+				"confirmation": null,
+				"context": null,
+				"moyen-contact": null,
+				"domaines-aides": null,
+				"needs": null,
+				"job": null,
+				"type_projet": null,
+				"numero-etudiant": null
+			},
+			"entities": {},
+			"intents": [{
+				"confidence": 0.99,
+				"slug": "projet"
+			}],
+			"conversation_token": "8480ed074ab739198e709e46ef226420",
+			"language": "fr",
+			"timestamp": "2017-03-23T14:11:16.111655+00:00",
+			"version": "2.4.0",
+			"status": 200
+		}`
+}
+
+func getBadFormatJSONResponse() string {
 	return `{
    "results":{
 	  "uuid": "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f",
