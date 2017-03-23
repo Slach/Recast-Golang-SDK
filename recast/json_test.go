@@ -8,6 +8,10 @@ func getServerErrorJSONResponse() string {
 	return `{"results":null,"message":"Internal server error"}`
 }
 
+func getSuccessFulPostMessageResponse() {
+	return `{"results":null,"message":"Messages successfully posted"}`
+}
+
 func getSuccessfulConverseJSONResponse() string {
 	return `{
 		"results":{

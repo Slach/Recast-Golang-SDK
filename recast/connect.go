@@ -11,11 +11,6 @@ const (
 	messagesEndpoint      string = "https://api-development.recast.ai/connect/v1/messages/"
 )
 
-type Attachment struct {
-	Content string `json:"content"`
-	Type    string `json:"type"`
-}
-
 type Message struct {
 	Participant    string     `json:"participant"`
 	ConversationId string     `json:"conversation"`
@@ -32,16 +27,16 @@ type ConnectClient struct {
 	Token string
 }
 
-func (client *ConnectClient) SendMessage(conversationId string, messages []Attachment) error {
+func (client *ConnectClient) SendMessage(conversationId string, messages ...Component) error {
 	httpClient := gorequest.New()
 	endpoint := conversationsEndpoint + conversationId + "/messages"
 
 	send := struct {
-		Messages []Attachment `json:"messages"`
+		Messages []Component `json:"messages"`
 	}{messages}
 
 	var response struct {
-		Message string
+		Message string `json:"message"`
 	}
 
 	resp, _, requestErr := httpClient.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).EndStruct(&response)
@@ -59,11 +54,11 @@ func (client *ConnectClient) SendMessage(conversationId string, messages []Attac
 	return nil
 }
 
-func (client *ConnectClient) BroadcastMessage(messages []Message) error {
+func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 	httpClient := gorequest.New()
 
 	send := struct {
-		Messages []Message `json:"messages"`
+		Messages []Component `json:"messages"`
 	}{messages}
 
 	var response struct {
