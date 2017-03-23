@@ -65,8 +65,8 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	}
 
 	type respJSON struct {
-		Results *Response `json:"results"`
-		Message string    `json:"message"`
+		Results Response `json:"results"`
+		Message string   `json:"message"`
 	}
 
 	var response respJSON
@@ -82,7 +82,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	return *response.Results, nil
+	return response.Results, nil
 }
 
 // AnalyzeFile handles voice file request to Recast.Ai and returns a Response
@@ -122,8 +122,8 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	}
 
 	var response struct {
-		Results *Response `json:"results"`
-		Message string    `json:"results"`
+		Results Response `json:"results"`
+		Message string   `json:"message"`
 	}
 
 	resp, _, requestErr := httpClient.Post(requestEndpoint).
@@ -141,7 +141,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	return *response.Results, nil
+	return response.Results, nil
 }
 
 type ConverseOpts struct {
@@ -195,8 +195,8 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	}
 
 	var response struct {
-		Results *Conversation `json:"results"`
-		Message string        `json:"string"`
+		Results Conversation `json:"results"`
+		Message string       `json:"message"`
 	}
 
 	resp, _, requestErr := httpClient.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
@@ -210,7 +210,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		return Conversation{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	conversation := *response.Results
+	conversation := response.Results
 	conversation.AuthorizationToken = token
 
 	return conversation, nil

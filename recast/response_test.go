@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/jarcoal/httpmock"
+	"github.com/parnurzeal/gorequest"
 )
 
 func expect(truth bool, t *testing.T, msg string) {
@@ -14,9 +15,10 @@ func expect(truth bool, t *testing.T, msg string) {
 }
 
 func TestResponseWithNoIntents(t *testing.T) {
+	gorequest.DisableTransportSwap = true
 	testClient := RequestClient{
-		token:    "mocktoken",
-		language: "en",
+		Token:    "mocktoken",
+		Language: "en",
 	}
 
 	testText := "some random test text"
@@ -24,10 +26,10 @@ func TestResponseWithNoIntents(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	res := httpmock.NewStringResponder(http.StatusOK, getSuccessNoIntentJSONResponse())
-	httpmock.RegisterResponder("POST", APIEndpoint, res)
+	res := httpmock.NewStringResponder(http.StatusOK, getSuccessNoIntentRequestJSONResponse())
+	httpmock.RegisterResponder("POST", requestEndpoint, res)
 
-	r, err := testClient.TextRequest(testText, nil)
+	r, err := testClient.AnalyzeText(testText, nil)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
 	}
@@ -39,9 +41,10 @@ func TestResponseWithNoIntents(t *testing.T) {
 }
 
 func TestResponseHelpers(t *testing.T) {
+	gorequest.DisableTransportSwap = true
 	testClient := RequestClient{
-		token:    "mocktoken",
-		language: "en",
+		Token:    "mocktoken",
+		Language: "en",
 	}
 
 	testText := "some random test text"
@@ -49,10 +52,10 @@ func TestResponseHelpers(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	res := httpmock.NewStringResponder(http.StatusOK, getSuccessfulJSONResponse())
-	httpmock.RegisterResponder("POST", APIEndpoint, res)
+	res := httpmock.NewStringResponder(http.StatusOK, getSuccessfulRequestJSONResponse())
+	httpmock.RegisterResponder("POST", requestEndpoint, res)
 
-	r, err := testClient.TextRequest(testText, nil)
+	r, err := testClient.AnalyzeText(testText, nil)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
 	}
@@ -86,22 +89,4 @@ func TestResponseHelpers(t *testing.T) {
 	expect(err == nil, t, "Should find an intent")
 	expect(intent.Slug == "weather", t, "Should have the right slug")
 	expect(intent.Confidence == 0.67, t, "Should have the right confidence")
-}
-
-func getSuccessNoIntentJSONResponse() string {
-	return `{
-		"results": {
-			"uuid": "7c88d59d-9eaa-4b4f-ba3d-be466cf03b5f",
-			"source": "Some text",
-			"intents": [],
-			"act": "assert",
-			"type": "desc:desc",
-			"sentiment": "neutral",
-			"entities": {},
-			"language": "en",
-			"version":"2.0.0",
-			"timestamp":"2016-07-10T23:17:59+02:00",
-			"status":200
-		}
-	}`
 }
