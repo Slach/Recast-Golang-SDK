@@ -64,7 +64,11 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 
 	var response respJSON
 
-	resp, _, requestErr := httpClient.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Post(requestEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", token)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return Response{}, requestErr[0]
@@ -192,7 +196,11 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		Message string       `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Post(converseEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", token)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return Conversation{}, requestErr[0]

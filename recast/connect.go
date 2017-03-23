@@ -39,7 +39,11 @@ func (client *ConnectClient) SendMessage(conversationId string, messages ...Comp
 		Message string `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Post(endpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", client.Token)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return requestErr[0]
@@ -65,7 +69,11 @@ func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 		Message string
 	}
 
-	resp, _, requestErr := httpClient.Post(messagesEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Post(messagesEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", client.Token)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return requestErr[0]

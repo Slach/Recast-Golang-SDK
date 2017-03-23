@@ -48,7 +48,11 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 		Message string        `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.Put(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Put(converseEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return requestErr[0]
@@ -62,20 +66,17 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 	return nil
 }
 
-type resetMemoryForms struct {
-	ConversationToken string `json:"conversation_token"`
-}
-
 func (conv *Conversation) Reset() error {
-	send := resetMemoryForms{conv.ConversationToken}
-
 	httpClient := gorequest.New()
 
 	var response struct {
 		Message string `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.Delete(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).EndStruct(&response)
+	resp, _, requestErr := httpClient.
+		Delete(converseEndpoint+"?conversation_token="+conv.ConversationToken).
+		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return requestErr[0]
