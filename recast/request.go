@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-
-	"github.com/parnurzeal/gorequest"
 )
 
 var (
@@ -45,7 +43,7 @@ func NewRequestClient(token string, language string) *RequestClient {
 func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language
@@ -65,7 +63,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	if lang != "" {
 		send.Language = lang
 	}
-	resp, _, requestErr := gorequest.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	resp, _, requestErr := httpClient.Post(requestEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
 	if requestErr != nil {
 		return Response{}, requestErr[0]
 	}
@@ -100,7 +98,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 
 	if opts != nil {
 		if opts.Language != "" {
@@ -131,7 +129,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		send.Language = lang
 	}
 
-	resp, _, requestErr := gorequest.Post(requestEndpoint).
+	resp, _, requestErr := httpClient.Post(requestEndpoint).
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
@@ -187,7 +185,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	lang := c.Language
 	token := c.Token
 
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 	if opts != nil {
 		if opts.Language != "" {
 			lang = opts.Language
@@ -214,7 +212,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		Language:          lang,
 	}
 
-	resp, _, requestErr := gorequest.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
+	resp, _, requestErr := httpClient.Post(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", token)).End()
 	if requestErr != nil {
 		return Conversation{}, requestErr[0]
 	}

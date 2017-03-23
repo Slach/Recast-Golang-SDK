@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"time"
-
-	"github.com/parnurzeal/gorequest"
 )
 
 type Action struct {
@@ -39,14 +37,14 @@ type setMemoryForms struct {
 }
 
 func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) error {
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 
 	send := setMemoryForms{
 		Memory:            memory,
 		ConversationToken: conv.ConversationToken,
 	}
 
-	resp, _, requestErr := gorequest.Put(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+	resp, _, requestErr := httpClient.Put(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
 	if requestErr != nil {
 		return requestErr[0]
 	}
@@ -83,8 +81,8 @@ type resetMemoryForms struct {
 func (conv *Conversation) Reset() error {
 	send := resetMemoryForms{conv.ConversationToken}
 
-	gorequest := gorequest.New()
-	resp, _, requestErr := gorequest.Delete(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
+	httpClient := newHttpWrapper()
+	resp, _, requestErr := httpClient.Delete(converseEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).End()
 
 	if requestErr != nil {
 		return requestErr[0]

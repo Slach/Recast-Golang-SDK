@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	"github.com/parnurzeal/gorequest"
 )
 
 const (
@@ -36,14 +34,14 @@ type ConnectClient struct {
 }
 
 func (client *ConnectClient) SendMessage(conversationId string, messages []Attachment) error {
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 	endpoint := conversationsEndpoint + conversationId + "/messages"
 
 	send := struct {
 		Messages []Attachment `json:"messages"`
 	}{messages}
 
-	resp, _, requestErr := gorequest.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
+	resp, _, requestErr := httpClient.Post(endpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
 	if requestErr != nil {
 		return requestErr[0]
 	}
@@ -70,12 +68,12 @@ func (client *ConnectClient) SendMessage(conversationId string, messages []Attac
 }
 
 func (client *ConnectClient) BroadcastMessage(messages []Message) error {
-	gorequest := gorequest.New()
+	httpClient := newHttpWrapper()
 
 	send := struct {
 		Messages []Message `json:"messages"`
 	}{messages}
-	resp, _, requestErr := gorequest.Post(messagesEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
+	resp, _, requestErr := httpClient.Post(messagesEndpoint).Send(send).Set("Authorization", fmt.Sprintf("Token %s", client.Token)).End()
 	if requestErr != nil {
 		return requestErr[0]
 	}
