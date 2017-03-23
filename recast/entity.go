@@ -1,5 +1,89 @@
 package recast
 
+import (
+	"encoding/json"
+)
+
+var (
+	goldEntities []string = []string{
+		"cardinal",
+		"color",
+		"datetime",
+		"distance",
+		"duration",
+		"email",
+		"emoji",
+		"ip",
+		"interval",
+		"job",
+		"language",
+		"location",
+		"mass",
+		"money",
+		"nationality",
+		"number",
+		"ordinal",
+		"organization",
+		"percent",
+		"person",
+		"phone",
+		"pronoun",
+		"set",
+		"sort",
+		"speed",
+		"temperature",
+	}
+)
+
+type CustomEntity struct {
+	Raw        string  `json:"raw"`
+	Value      string  `json:"value"`
+	Confidence float64 `json:"value"`
+	Name       string
+}
+
+func isGold(entity string) bool {
+	for i := range goldEntities {
+		if goldEntities[i] == entity {
+			return true
+		}
+	}
+	return false
+}
+
+func getCustomEntities(data []byte) map[string][]CustomEntity {
+	customs := make(map[string][]CustomEntity, 0)
+	var result struct {
+		Results struct {
+			Entities map[string][]interface{} `json:"entities"`
+		} `json:"results"`
+	}
+	err := json.Unmarshal(data, &result)
+
+	if err != nil {
+		return customs
+	}
+
+	for k, v := range result.Results.Entities {
+		var custom CustomEntity
+		if isGold(k) {
+			continue
+		}
+		for _, e := range v {
+			entity, ok := e.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			custom.Name = k
+			custom.Confidence, _ = entity["confidence"].(float64)
+			custom.Raw, _ = entity["raw"].(string)
+			custom.Value, _ = entity["value"].(string)
+			customs[k] = append(customs[k], custom)
+		}
+	}
+	return customs
+}
+
 type Cardinal struct {
 	Bearing    float64 `json:"bearing"`
 	Raw        string  `json:"raw"`

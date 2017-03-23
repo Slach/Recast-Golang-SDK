@@ -64,11 +64,13 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 
 	var response respJSON
 
-	resp, _, requestErr := httpClient.
+	resp, body, requestErr := httpClient.
 		Post(requestEndpoint).
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
 		EndStruct(&response)
+	customs := getCustomEntities(body)
+	fmt.Printf("%+v\n", customs)
 
 	if requestErr != nil {
 		return Response{}, requestErr[0]
@@ -78,6 +80,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	if resp.StatusCode != 200 {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
+	response.Results.CustomEntities = getCustomEntities(body)
 
 	return response.Results, nil
 }
@@ -123,7 +126,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		Message string   `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.Post(requestEndpoint).
+	resp, body, requestErr := httpClient.Post(requestEndpoint).
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
@@ -137,6 +140,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	if resp.StatusCode != 200 {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
+	response.Results.CustomEntities = getCustomEntities(body)
 
 	return response.Results, nil
 }
@@ -196,7 +200,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 		Message string       `json:"message"`
 	}
 
-	resp, _, requestErr := httpClient.
+	resp, body, requestErr := httpClient.
 		Post(converseEndpoint).
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
@@ -212,6 +216,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	}
 
 	conversation := response.Results
+	conversation.CustomEntities = getCustomEntities(body)
 	conversation.AuthorizationToken = token
 
 	return conversation, nil

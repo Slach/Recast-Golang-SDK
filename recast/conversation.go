@@ -28,6 +28,7 @@ type Conversation struct {
 	Timestamp          time.Time              `json:"timestamp"`
 	Status             int                    `json:"status"`
 	AuthorizationToken string
+	CustomEntities     map[string][]CustomEntity
 }
 
 type setMemoryForms struct {
