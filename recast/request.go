@@ -14,6 +14,7 @@ var (
 	ErrTokenNotSet = errors.New("Request cannot be made without a token set")
 )
 
+// RequestClient provides an interface to interact with Recast.AI Natural Language Processing API
 type RequestClient struct {
 	Token    string
 	Language string
@@ -31,8 +32,15 @@ type forms struct {
 }
 
 // AnalyzeText processes a text request to Recast.AI API and returns a Response
-// opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
-// Set opts to nil if you want the request to use your default client token and language
+// opts can be used to specify a token and/or language to use for this request
+// Set opts to nil if you want the request to use the client's token and language
+//	client := recast.RequestClient{
+//		Token: "YOUR_AUTHORIZATION_TOKEN",
+//		Language: "fr",
+//	}
+//	opts := recast.ReqOpts{Language: "en"}
+//	// This request will be processed in english
+//	response, err := client.AnalyzeText("Hello what is the weather in London?", &opts)
 func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
@@ -84,7 +92,15 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 }
 
 // AnalyzeFile handles voice file request to Recast.Ai and returns a Response
-// opts is a map of parameters used for the request. Two parameters can be provided: "token" and "language". They will be used instead of the client token and language.
+// opts can be used to specify a token and/or language to use for this request
+// Set opts to nil if you want the request to use the client's token and language
+//	client := recast.RequestClient{
+//		Token: "YOUR_AUTHORIZATION_TOKEN",
+//		Language: "fr",
+//	}
+//	opts := recast.ReqOpts{Language: "en"}
+//	// This request will be processed in english
+//	response, err := client.AnalyzeFile("audio_file.wav", &opts)
 func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, error) {
 	lang := c.Language
 	token := c.Token
@@ -143,6 +159,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	return response.Results, nil
 }
 
+// ConverseOpts contains options for ConverseText method
 type ConverseOpts struct {
 	ConversationToken string
 	Memory            map[string]map[string]interface{}
@@ -158,8 +175,17 @@ type requestForms struct {
 }
 
 // ConverseText processes a text request to Recast.AI API and returns a Response
-// opts is a map of parameters used for the request. Two parameters can be provided: are "token" and "language". They will be used instead of the client token and language (if one is set).
-// Set opts to nil if you want the request to use your default client token and language
+// ConverseOpts can be used to specify a conversation token, an authorization token, a memory state and a language to use for this request
+// Set opts to nil if you want the request to use the client's token and language
+// If a conversation token is present in the options, the request will be processed
+// in this conversation, othewise a new conversation is created and the token is returned
+//	client := recast.RequestClient{
+//		Token: "YOUR_AUTHORIZATION_TOKEN",
+//		Language: "fr",
+//	}
+//	opts := recast.ReqOpts{Language: "en"}
+//	// This request will be processed in english
+//	conversation, err := client.ConverseText("Hello what is the weahter in London?", &opts)
 func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversation, error) {
 	var memory map[string]map[string]interface{}
 	var conversationToken string
