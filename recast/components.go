@@ -121,3 +121,8 @@ type Attachment struct {
 func (c Attachment) IsComponent() bool {
 	return true
 }
+
+// NewTextMessage returns a new text attachment
+func NewTextMessage(text string) Attachment {
+	return Attachment{Type: "text", Content: text}
+}
