@@ -35,11 +35,19 @@ var (
 	}
 )
 
+// CustomEntity represents a Recast.AI user-defined entity
 type CustomEntity struct {
-	Raw        string  `json:"raw"`
-	Value      string  `json:"value"`
+	// Raw string detected and extracted from the input
+	Raw string `json:"raw"`
+
+	// Value of the entity
+	Value string `json:"value"`
+
+	// Detection confidence
 	Confidence float64 `json:"value"`
-	Name       string
+
+	// Name of the entity
+	Name string
 }
 
 func isGold(entity string) bool {
@@ -84,12 +92,14 @@ func getCustomEntities(data []byte) map[string][]CustomEntity {
 	return customs
 }
 
+// Cardinal Recast.AI entity
 type Cardinal struct {
 	Bearing    float64 `json:"bearing"`
 	Raw        string  `json:"raw"`
-	confidence float64 `json:"confidence"`
+	Confidence float64 `json:"confidence"`
 }
 
+// Color Recast.AI entity
 type Color struct {
 	Rgb        string  `json:"rgb"`
 	Hex        string  `json:"hex"`
@@ -97,6 +107,7 @@ type Color struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Datetime Recast.AI entity
 type Datetime struct {
 	Formatted  string  `json:"formatted"`
 	Iso        string  `json:"iso"`
@@ -106,6 +117,7 @@ type Datetime struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Distance Recast.AI entity
 type Distance struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
@@ -114,6 +126,7 @@ type Distance struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Duration Recast.AI entity
 type Duration struct {
 	Chrono     string  `json:"chrono"`
 	Years      float64 `json:"years"`
@@ -126,6 +139,7 @@ type Duration struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Email Recast.AI entity
 type Email struct {
 	Local      string `json:"local"`
 	Tag        string `json:"tag"`
@@ -134,6 +148,7 @@ type Email struct {
 	Confidence string `json:"confidence"`
 }
 
+// Emoji Recast.AI entity
 type Emoji struct {
 	Formatted   string   `json:"formatted"`
 	Feeling     string   `json:"feeling"`
@@ -144,6 +159,7 @@ type Emoji struct {
 	Confidence  float64  `json:"confidence"`
 }
 
+// Ip Recast.AI entity
 type Ip struct {
 	Formatted  string  `json:"formatted"`
 	Lat        float64 `json:"lat"`
@@ -152,6 +168,7 @@ type Ip struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Interval Recast.AI entity
 type Interval struct {
 	Begin           string  `json:"begin"`
 	End             string  `json:"end"`
@@ -164,11 +181,13 @@ type Interval struct {
 	Confidence      float64 `json:"confidence"`
 }
 
+// Job Recast.AI entity
 type Job struct {
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Language Recast.AI entity
 type Language struct {
 	Short      string `json:"short"`
 	Long       string `json:"long"`
@@ -176,6 +195,7 @@ type Language struct {
 	Confidence string `json:"confidence"`
 }
 
+// Location Recast.AI entity
 type Location struct {
 	Formatted  string  `json:"formatted"`
 	Lat        float64 `json:"lat"`
@@ -186,6 +206,7 @@ type Location struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Mass Recast.AI entity
 type Mass struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
@@ -194,6 +215,7 @@ type Mass struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Money Recast.AI entity
 type Money struct {
 	Amount     float64 `json:"amount"`
 	Currency   string  `json:"currency"`
@@ -202,6 +224,7 @@ type Money struct {
 	Confidence string  `json:"confidence"`
 }
 
+// Nationality Recast.AI entity
 type Nationality struct {
 	Short      string  `json:"short"`
 	Long       string  `json:"long"`
@@ -210,23 +233,27 @@ type Nationality struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Number Recast.AI entity
 type Number struct {
 	Scalar     float64 `json:"scalar"`
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Ordinal Recast.AI entity
 type Ordinal struct {
 	Rank       int32   `json:"rank"`
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Organization Recast.AI entity
 type Organization struct {
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Percent Recast.AI entity
 type Percent struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
@@ -234,18 +261,21 @@ type Percent struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Person Recast.AI entity
 type Person struct {
 	Fullname   string  `json:"fullname"`
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Phone Recast.AI entity
 type Phone struct {
 	Number     string  `json:"number"`
 	Raw        string  `json:"raw"`
 	Confidence float64 `json:"confidence"`
 }
 
+// Pronoun Recast.AI entity
 type Pronoun struct {
 	Person     int32   `json:"person"`
 	Number     string  `json:"number"`
@@ -254,6 +284,7 @@ type Pronoun struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Set Recast.AI entity
 type Set struct {
 	Next       string  `json:"next"`
 	Frequency  string  `json:"frequency"`
@@ -263,6 +294,7 @@ type Set struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Sort Recast.AI entity
 type Sort struct {
 	Order      string  `json:"order"`
 	Criterion  string  `json:"criterion"`
@@ -270,6 +302,7 @@ type Sort struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Speed Recast.AI entity
 type Speed struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
@@ -278,6 +311,7 @@ type Speed struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Temperature Recast.AI entity
 type Temperature struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
@@ -286,6 +320,7 @@ type Temperature struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Url Recast.AI entity
 type Url struct {
 	Scheme     string  `json:"scheme"`
 	Host       string  `json:"host"`
@@ -297,6 +332,7 @@ type Url struct {
 	Confidence float64 `json:"confidence"`
 }
 
+// Volume Recast.AI entity
 type Volume struct {
 	Scalar     float64 `json:"scalar"`
 	Unit       string  `json:"unit"`
