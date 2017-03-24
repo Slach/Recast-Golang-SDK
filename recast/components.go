@@ -8,38 +8,25 @@ type Component interface {
 
 // CardButton holds data for a button in messaging channels formats
 type CardButton struct {
-	// Title is the text displayed in the messaging channel
 	Title string `json:"title"`
-
-	// Type define the type of the button's action.
-	// It can be one of "postback", "web_url", "phone_number" or "element_share"
-	// See https://botconnector.recast.ai for details
-	// TODO: set the right url
-	Type string `json:"type"`
-
-	// Value holds the data that will be sent back by the button
+	Type  string `json:"type"`
 	Value string `json:"value"`
 }
 
 // CardContent holds data for a card in messaging platforms
 type CardContent struct {
-	// Title is the text displayed in the card
-	Title string `json:"title"`
-
-	// ImageUrl can be set to display an image with the message
-	ImageUrl string `json:"imageUrl"`
-
-	// Buttons offer the possibility for the user to send back a message
-	// clicking on it
-	Buttons []CardButton `json:"buttons"`
+	Title    string       `json:"title"`
+	ImageUrl string       `json:"imageUrl"`
+	Buttons  []CardButton `json:"buttons"`
 }
 
 // Card holds formats for a generic messaging card for Recast.AI botconnector
+//	card := recast.NewCard("Do you like to code?").
+//		AddImage("https://unsplash.it/1920/1080/?random").
+//		AddButton("Yes", "postback", "I like to code").
+//		AddButton("No", "postback", "I don't like to code")
 type Card struct {
-	// Type will always be "card", needed for botconnector
-	Type string `json:"type"`
-
-	// Content holds the data of the card buttons and image
+	Type    string      `json:"type"`
 	Content CardContent `json:"content"`
 }
 
@@ -74,30 +61,24 @@ func (c *Card) AddButton(title, type_, value string) *Card {
 
 // QuickRepliesButton holds format for a generic quickreply
 type QuickRepliesButton struct {
-	// Title is the text displayed in the messaging app suggested replies
 	Title string `json:"title"`
-
-	// Value is the text sent back to the bot
 	Value string `json:"value"`
 }
 
 // QuickRepliesContent holds data for QuickReplies
 type QuickRepliesContent struct {
-	// Title is the message displayed below quick replies buttons
-	Title string `json:"title"`
-
-	// Buttons offer the possibility to the user to quickly choose a reply
+	Title   string               `json:"title"`
 	Buttons []QuickRepliesButton `json:"buttons"`
 }
 
 // QuickReplies holds format for generic quick replies for Recast.AI botconnector
 // It allows the user to quickly choose a response that will be sent back as
 // a text message to the bot
+//	quickReplies := recast.NewQuickReplies("Do you like to code?").
+//		AddButton("Yes", "I like to code").
+//		AddButton("No", "I don't like to code")
 type QuickReplies struct {
-	// Type will always be "quickReplies", needed by botconnector
-	Type string `json:"type"`
-
-	// Content holds question and replies for quickreplies
+	Type    string              `json:"type"`
 	Content QuickRepliesContent `json:"content"`
 }
 
@@ -125,12 +106,14 @@ func (c *QuickReplies) IsComponent() bool {
 }
 
 // Attachment holds data for both text, picture and video messages
+//	attachment := Attachment{
+//		Type: "text",
+//		Content: "Hello World",
+//	}
 type Attachment struct {
 	// Type must be set according to the content sent
 	// It can be either "text", "picture" or "video"
-	Type string `json:"type"`
-
-	// Content contains the text of the message or the url of the resource sent
+	Type    string `json:"type"`
 	Content string `json:"content"`
 }
 
