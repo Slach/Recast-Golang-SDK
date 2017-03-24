@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// Entities holds the entity hashmap returned by a call to
+// Recast.AI Natural Language Processing service
 type Entities struct {
 	Cardinal     []Cardinal     `json:"cardinal"`
 	Color        []Color        `json:"color"`
@@ -35,7 +37,7 @@ type Entities struct {
 	Temperature  []Temperature  `json:"temperature"`
 }
 
-// Response is the HTTP response from the Recast API
+// Response is the HTTP response from the Recast.AI Natural Language Processing API
 type Response struct {
 	UUID           string    `json:"uuid"`
 	Source         string    `json:"source"`
