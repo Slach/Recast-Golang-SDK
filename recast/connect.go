@@ -1,6 +1,7 @@
 package recast
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/parnurzeal/gorequest"
@@ -28,6 +29,9 @@ type ConnectClient struct {
 }
 
 func (client *ConnectClient) SendMessage(conversationId string, messages ...Component) error {
+	if len(messages) == 0 {
+		return errors.New("No message to send")
+	}
 	httpClient := gorequest.New()
 	endpoint := conversationsEndpoint + conversationId + "/messages"
 
@@ -59,6 +63,9 @@ func (client *ConnectClient) SendMessage(conversationId string, messages ...Comp
 }
 
 func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
+	if len(messages) == 0 {
+		return errors.New("No message to send")
+	}
 	httpClient := gorequest.New()
 
 	send := struct {

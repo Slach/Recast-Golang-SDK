@@ -69,8 +69,6 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
 		EndStruct(&response)
-	customs := getCustomEntities(body)
-	fmt.Printf("%+v\n", customs)
 
 	if requestErr != nil {
 		return Response{}, requestErr[0]
