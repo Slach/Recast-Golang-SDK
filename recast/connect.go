@@ -20,6 +20,8 @@ type Message struct {
 	Participant    string     `json:"participant"`
 	ConversationId string     `json:"conversation"`
 	Attachment     Attachment `json:"attachment"`
+	SenderId       string
+	ChatId         string
 }
 
 // MessageData contains the Message and messaging informations about the message
@@ -31,19 +33,21 @@ type MessageData struct {
 
 // ParseConnectorMessage handles a request coming from BotConnector API.
 // It parses the request body into a MessageData struct
-func ParseConnectorMessage(r *http.Request) (MessageData, error) {
+func ParseConnectorMessage(r *http.Request) (Message, error) {
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		return err
+		return Message{}, err
 	}
 
 	var msg MessageData
 	if err := json.Unmarshal(body, &msg); err != nil {
-		return err
+		return Message{}, err
 	}
+	msg.Message.SenderId = msg.SenderId
+	msg.Message.ChatId = msg.ChatId
 
-	return msg
+	return msg.Message, nil
 }
 
 // ConnectClient provides an interface to Recast.AI connector service
