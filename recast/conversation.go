@@ -67,6 +67,37 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 	return nil
 }
 
+func (conv *Conversation) ResetMemory() error {
+	httpClient := gorequest.New()
+
+	send := struct {
+		Memory            *map[string]map[string]interface{}
+		ConversationToken string
+	}{nil, conv.ConversationToken}
+
+	var response struct {
+		Results *Conversation `json:"results"`
+		Message string        `json:"message"`
+	}
+
+	resp, _, requestErr := httpClient.
+		Put(converseEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
+		EndStruct(&response)
+
+	if requestErr != nil {
+		return requestErr[0]
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
+	}
+
+	return nil
+}
+
 func (conv *Conversation) Reset() error {
 	httpClient := gorequest.New()
 

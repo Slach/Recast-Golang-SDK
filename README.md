@@ -9,7 +9,7 @@ Package documentation: https://godoc.org/github.com/RecastAI/SDK-Golang/recast
 
 ## Synospis
 
-This module is a Golang interface to the [Recast.AI](https://recast.ai) API. It allows you to:
+This package is a Golang interface to the [Recast.AI](https://recast.ai) API. It allows you to:
 - [Analyse your text](https://github.com/RecastAI/SDK-Golang/wiki/Analyse-text)
 - [Manage your conversations](https://github.com/RecastAI/SDK-Golang/wiki/Build-your-bot)
 - [Receive and send messages](https://github.com/RecastAI/SDK-Golang/wiki/Build-your-bot)
