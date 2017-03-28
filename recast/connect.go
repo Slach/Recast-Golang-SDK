@@ -1,8 +1,11 @@
 package recast
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/parnurzeal/gorequest"
 )
@@ -24,6 +27,23 @@ type MessageData struct {
 	Message  Message `json:"message"`
 	SenderId string  `json:"senderId"`
 	ChatId   string  `json:"chatId"`
+}
+
+// ParseConnectorMessage handles a request coming from BotConnector API.
+// It parses the request body into a MessageData struct
+func ParseConnectorMessage(r *http.Request) (MessageData, error) {
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		return err
+	}
+
+	var msg MessageData
+	if err := json.Unmarshal(body, &msg); err != nil {
+		return err
+	}
+
+	return msg
 }
 
 // ConnectClient provides an interface to Recast.AI connector service
