@@ -17,7 +17,6 @@ const (
 
 // Message contains data sent by Recast.AI connector.
 type Message struct {
-	Participant    string     `json:"participant"`
 	ConversationId string     `json:"conversation"`
 	Attachment     Attachment `json:"attachment"`
 	SenderId       string
