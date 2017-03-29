@@ -3,10 +3,10 @@ package recast
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-
 	"github.com/parnurzeal/gorequest"
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
 )
 
 var (
@@ -83,7 +83,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 	response.Results.CustomEntities = getCustomEntities(body)
@@ -151,7 +151,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 	response.Results.CustomEntities = getCustomEntities(body)
@@ -235,7 +235,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return Conversation{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 

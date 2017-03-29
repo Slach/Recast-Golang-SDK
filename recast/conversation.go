@@ -2,9 +2,9 @@ package recast
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/parnurzeal/gorequest"
+	"net/http"
+	"time"
 )
 
 type Action struct {
@@ -60,7 +60,7 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
 	}
 
@@ -91,7 +91,7 @@ func (conv *Conversation) ResetMemory() error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
 	}
 
@@ -114,7 +114,7 @@ func (conv *Conversation) Reset() error {
 		return requestErr[0]
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Request failed(%s): %s", resp.Status, response.Message)
 	}
 
