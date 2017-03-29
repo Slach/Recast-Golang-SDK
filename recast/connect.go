@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/parnurzeal/gorequest"
@@ -13,6 +12,10 @@ import (
 const (
 	conversationsEndpoint string = "https://api-staging.recast.ai/connect/v1/conversations/"
 	messagesEndpoint      string = "https://api-staging.recast.ai/connect/v1/messages/"
+)
+
+var (
+	ErrNoMessageToSend = errors.New("No message to send")
 )
 
 // Message contains data sent by Recast.AI connector.
@@ -33,14 +36,10 @@ type MessageData struct {
 // ParseConnectorMessage handles a request coming from BotConnector API.
 // It parses the request body into a MessageData struct
 func ParseConnectorMessage(r *http.Request) (Message, error) {
-	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if err != nil {
-		return Message{}, err
-	}
 
 	var msg MessageData
-	if err := json.Unmarshal(body, &msg); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		return Message{}, err
 	}
 	msg.Message.SenderId = msg.SenderId
@@ -68,7 +67,7 @@ type ConnectClient struct {
 //	err := client.SendMessage("CONVERSATION_ID", card)
 func (client *ConnectClient) SendMessage(conversationId string, messages ...Component) error {
 	if len(messages) == 0 {
-		return errors.New("No message to send")
+		return ErrNoMessageToSend
 	}
 	httpClient := gorequest.New()
 	endpoint := conversationsEndpoint + conversationId + "/messages"
@@ -93,7 +92,7 @@ func (client *ConnectClient) SendMessage(conversationId string, messages ...Comp
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
@@ -107,7 +106,7 @@ func (client *ConnectClient) SendMessage(conversationId string, messages ...Comp
 //	err := client.BroadcastMessage(card)
 func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 	if len(messages) == 0 {
-		return errors.New("No message to send")
+		return ErrNoMessageToSend
 	}
 	httpClient := gorequest.New()
 
@@ -131,7 +130,7 @@ func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
