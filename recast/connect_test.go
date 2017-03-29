@@ -9,7 +9,7 @@ import (
 )
 
 func TestSendMessageParameters(t *testing.T) {
-	card := NewCard("card title").
+	card := NewCard("card title", "subtitle").
 		AddImage("image_url").
 		AddButton("Button", "postback", "Button content")
 
@@ -82,7 +82,7 @@ func TestSendMessageErrors(t *testing.T) {
 }
 
 func TestBroadcastMessageParameters(t *testing.T) {
-	card := NewCard("card title").
+	card := NewCard("card title", "subtitle").
 		AddImage("image_url").
 		AddButton("Button", "postback", "Button content")
 

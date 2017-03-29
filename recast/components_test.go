@@ -5,7 +5,7 @@ import "testing"
 func TestComponentsInterface(t *testing.T) {
 	// Attachment, Cards and QuickReplies should implement IsComponent
 
-	card := NewCard("card title").
+	card := NewCard("card title", "subtitle").
 		AddImage("image_url").
 		AddButton("Button", "postback", "Button content")
 
