@@ -32,6 +32,8 @@ You can follow us on Twitter at [@recastai](https://twitter.com/recastai) for up
 
 [Saif Abid](https://github.com/saifabid)
 
+[Yannick Heinrich](https://github.com/yageek)
+
 ## License
 
 Copyright (c) [2016] [Recast.AI](https://recast.ai)
