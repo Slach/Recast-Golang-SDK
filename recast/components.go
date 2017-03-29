@@ -16,6 +16,7 @@ type CardButton struct {
 // CardContent holds data for a card in messaging platforms
 type CardContent struct {
 	Title    string       `json:"title"`
+	Subtitle string       `json:"subtitle"`
 	ImageUrl string       `json:"imageUrl"`
 	Buttons  []CardButton `json:"buttons"`
 }
@@ -33,11 +34,12 @@ type Card struct {
 // NewCard initializes a new card with the specified title
 // It can be used to display informations and images to the user
 // or to ask multiple choice question with actionable buttons
-func NewCard(title string) *Card {
+func NewCard(title, subtitle string) *Card {
 	return &Card{
 		Type: "card",
 		Content: CardContent{
-			Title: title,
+			Title:    title,
+			Subtitle: subtitle,
 		},
 	}
 }

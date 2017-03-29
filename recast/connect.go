@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	conversationsEndpoint string = "https://api-development.recast.ai/connect/v1/conversations/"
-	messagesEndpoint      string = "https://api-development.recast.ai/connect/v1/messages/"
+	conversationsEndpoint string = "https://api-staging.recast.ai/connect/v1/conversations/"
+	messagesEndpoint      string = "https://api-staging.recast.ai/connect/v1/messages/"
 )
 
 // Message contains data sent by Recast.AI connector.
