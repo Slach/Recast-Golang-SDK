@@ -3,7 +3,6 @@
 ![alt text][logo]
 
 # Recast.AI - SDK-Golang
-Recast.AI official SDK in Node.js
 
 Recast.AI official SDK in Golang.
 
