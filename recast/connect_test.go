@@ -1,11 +1,13 @@
 package recast
 
 import (
-	"net/http"
-	"testing"
-
 	"github.com/jarcoal/httpmock"
 	"github.com/parnurzeal/gorequest"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync"
+	"testing"
 )
 
 func TestSendMessageParameters(t *testing.T) {
@@ -21,7 +23,7 @@ func TestSendMessageParameters(t *testing.T) {
 		Content: "Hello",
 		Type:    "text",
 	}
-	client := ConnectClient{"recast_token"}
+	client := NewConnectClient("recast_token")
 	conversationId := "conversation_id"
 
 	gorequest.DisableTransportSwap = true
@@ -58,7 +60,7 @@ func TestSendMessageErrors(t *testing.T) {
 		Content: "Hello",
 		Type:    "bad_type",
 	}
-	client := ConnectClient{"recast_token"}
+	client := NewConnectClient("recast_token")
 	conversationId := "conversation_id"
 
 	gorequest.DisableTransportSwap = true
@@ -94,7 +96,7 @@ func TestBroadcastMessageParameters(t *testing.T) {
 		Content: "Hello",
 		Type:    "text",
 	}
-	client := ConnectClient{"recast_token"}
+	client := NewConnectClient("recast_token")
 
 	gorequest.DisableTransportSwap = true
 	httpmock.Activate()
@@ -130,7 +132,7 @@ func TestBroadcastMessageErrors(t *testing.T) {
 		Content: "Hello",
 		Type:    "bad_type",
 	}
-	client := ConnectClient{"recast_token"}
+	client := NewConnectClient("recast_token")
 
 	gorequest.DisableTransportSwap = true
 	httpmock.Activate()
@@ -153,8 +155,63 @@ func TestBroadcastMessageErrors(t *testing.T) {
 }
 
 func TestSendMessageWithError(t *testing.T) {
-	client := ConnectClient{
-		Token: "token",
-	}
+	client := NewConnectClient("token")
 	client.Token = "aoeu"
+}
+
+func TestParseMessage(t *testing.T) {
+	r, _ := http.NewRequest("GET", "/", nil)
+
+	_, err := ParseConnectorMessage(r)
+	if err == nil {
+		t.Error("Request has no body and should not be able extract a message")
+	}
+	reader := strings.NewReader(getValidConversationMessage())
+	r, _ = http.NewRequest("POST", "/endpoint", reader)
+
+	msg, err := ParseConnectorMessage(r)
+	if err != nil {
+		t.Error("Payload should be considered as valid")
+	}
+
+	if msg.ConversationId != "f206b482-cb0c-435b-91bc-4628c8829d83" {
+		t.Error("Invalid conversation id")
+	}
+}
+
+func TestHttpHandler(t *testing.T) {
+
+	client := NewConnectClient("token")
+	buffer := strings.NewReader(getValidConversationMessage())
+	req, err := http.NewRequest("POST", "/ai", buffer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	called := false
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	client.UseHandler(MessageHandlerFunc(func(w MessageWriter, m Message) {
+		defer wg.Done()
+
+		called = true
+		attachment := Attachment{
+			Content: "Hello",
+			Type:    "text",
+		}
+		w.Reply(attachment)
+	}))
+
+	rr := httptest.NewRecorder()
+	client.ServeHTTP(rr, req)
+	wg.Wait()
+
+	resp := rr.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Should have correctly responds to AI API - Received: %d \n", resp.StatusCode)
+	}
+
+	if !called {
+		t.Errorf("The handler should have been called")
+	}
 }

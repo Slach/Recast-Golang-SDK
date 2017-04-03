@@ -138,3 +138,26 @@ func getSuccessNoIntentRequestJSONResponse() string {
 		}
 	}`
 }
+
+func getValidConversationMessage() string {
+	return `
+{
+    "message": {
+        "data": {
+            "userName": "Yannick Heinrich"
+        },
+        "__v": 0,
+        "participant": "c9244b31-45f2-431c-be10-d3361851cf7e",
+        "conversation": "f206b482-cb0c-435b-91bc-4628c8829d83",
+        "attachment": {
+            "content": "Hello",
+            "type": "text"
+        },
+        "receivedAt": "2017-03-20T21:58:52.346Z",
+        "isActive": true,
+        "_id": "61a7921b-f771-4211-82ca-05885160fd6d"
+    },
+    "chatId": "chatId",
+    "senderId": "senderId"
+}`
+}
