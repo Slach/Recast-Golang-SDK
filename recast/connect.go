@@ -16,6 +16,7 @@ const (
 
 var (
 	ErrNoMessageToSend = errors.New("No message to send")
+	ErrNoRequestBody   = errors.New("The request's body is empty")
 )
 
 // Message contains data sent by Recast.AI connector.
@@ -36,6 +37,9 @@ type MessageData struct {
 // ParseConnectorMessage handles a request coming from BotConnector API.
 // It parses the request body into a MessageData struct
 func ParseConnectorMessage(r *http.Request) (Message, error) {
+	if r.Body == nil {
+		return Message{}, ErrNoRequestBody
+	}
 	defer r.Body.Close()
 
 	var msg MessageData
@@ -48,6 +52,31 @@ func ParseConnectorMessage(r *http.Request) (Message, error) {
 	return msg.Message, nil
 }
 
+// MessageHandler is implemented
+// by any element that would like to receive a message.
+type MessageHandler interface {
+	ServeMessage(w MessageWriter, m Message)
+}
+
+// MessageHandlerFunc simpler wrapper for function.
+type MessageHandlerFunc func(w MessageWriter, m Message)
+
+func defaultMessageHandler(w MessageWriter, m Message) {
+	fmt.Printf("Message received: %v \n", m)
+}
+
+// ServeMessage implements the MessageHandler interface.
+func (f MessageHandlerFunc) ServeMessage(w MessageWriter, m Message) {
+	f(w, m)
+}
+
+// MessageWriter is the structure
+// allowing you to respond.
+type MessageWriter interface {
+	Reply(messages ...Component) error
+	Broadcast(messages ...Component) error
+}
+
 // ConnectClient provides an interface to Recast.AI connector service
 // It allows to send message to a particular user and broadcast message to all
 // users of a bot
@@ -55,7 +84,17 @@ func ParseConnectorMessage(r *http.Request) (Message, error) {
 //	message := recast.NewTextMessage("Hello")
 //	err := client.SendMessage("CONVERSATION_ID", message)
 type ConnectClient struct {
-	Token string
+	Token   string
+	handler MessageHandler
+}
+
+// NewConnectClient creates a new client with the provided
+// API token.
+func NewConnectClient(token string) *ConnectClient {
+	return &ConnectClient{
+		Token:   token,
+		handler: MessageHandlerFunc(defaultMessageHandler),
+	}
 }
 
 // SendMessage send messages to Recast.AI botconnector service
@@ -135,4 +174,39 @@ func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 	}
 
 	return nil
+}
+
+// UseHandler specify the handler when message
+// are received. By default, the message are printed to stdout.
+func (client *ConnectClient) UseHandler(h MessageHandler) {
+	client.handler = h
+}
+
+type messageWriter struct {
+	client  *ConnectClient
+	Context *Context
+}
+
+func (m *messageWriter) Reply(messages ...Component) error {
+	return m.client.SendMessage(m.Context.ConversationId, messages...)
+}
+
+func (m *messageWriter) Broadcast(messages ...Component) error {
+	return m.client.BroadcastMessage(messages...)
+}
+
+func (client *ConnectClient) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	message, err := ParseConnectorMessage(r)
+	if err != nil {
+		http.Error(w, "Invalid Content:", http.StatusBadRequest)
+		return
+	}
+	if client.handler != nil {
+		writer := &messageWriter{
+			client:  client,
+			Context: &Context{ConversationId: message.ConversationId, SenderId: message.SenderId},
+		}
+		go client.handler.ServeMessage(writer, message)
+	}
+	w.WriteHeader(http.StatusOK)
 }
