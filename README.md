@@ -1,10 +1,11 @@
+[logo]: https://cdn.recast.ai/brand/recast-ai-logo-inline.png "Recast.AI"
+
+![alt text][logo]
+
 # Recast.AI - SDK-Golang
 
-[logo]: https://github.com/RecastAI/SDK-NodeJs/blob/master/misc/logo-inline.png "Recast.AI"
-
-![Recast.AI Logo][logo]
-
 Recast.AI official SDK in Golang.
+
 Package documentation: https://godoc.org/github.com/RecastAI/SDK-Golang/recast
 
 ## Synospis

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	conversationsEndpoint string = "https://api-staging.recast.ai/connect/v1/conversations/"
-	messagesEndpoint      string = "https://api-staging.recast.ai/connect/v1/messages/"
+	conversationsEndpoint string = "https://api.recast.ai/connect/v1/conversations/"
+	messagesEndpoint      string = "https://api.recast.ai/connect/v1/messages/"
 )
 
 var (
