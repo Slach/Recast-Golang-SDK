@@ -39,18 +39,19 @@ type Entities struct {
 
 // Response is the HTTP response from the Recast.AI Natural Language Processing API
 type Response struct {
-	UUID           string    `json:"uuid"`
-	Source         string    `json:"source"`
-	Intents        []Intent  `json:"intents"`
-	Act            string    `json:"act"`
-	Type           string    `json:"type"`
-	Sentiment      string    `json:"sentiment"`
-	Entities       Entities  `json:"entities"`
-	Language       string    `json:"language"`
-	Version        string    `json:"version"`
-	Timestamp      time.Time `json:"timestamp"`
-	Status         int       `json:"status"`
-	CustomEntities map[string][]CustomEntity
+	UUID               string    `json:"uuid"`
+	Source             string    `json:"source"`
+	Intents            []Intent  `json:"intents"`
+	Act                string    `json:"act"`
+	Type               string    `json:"type"`
+	Sentiment          string    `json:"sentiment"`
+	Entities           Entities  `json:"entities"`
+	Language           string    `json:"language"`
+	ProcessingLanguage string    `json:"processing_language"`
+	Version            string    `json:"version"`
+	Timestamp          time.Time `json:"timestamp"`
+	Status             int       `json:"status"`
+	CustomEntities     map[string][]CustomEntity
 }
 
 func (r Response) isType(exp string) bool {
