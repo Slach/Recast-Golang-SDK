@@ -22,8 +22,10 @@ type Conversation struct {
 	NextActions        []Action               `json:"next_actions"`
 	Memory             map[string]interface{} `json:"memory"`
 	Intents            []Intent               `json:"intents"`
+	Sentiment          string                 `json:"sentiment`
 	Entities           Entities               `json:"entities"`
 	Language           string                 `json:"language"`
+	ProcessingLanguage string                 `json:"processing_language"`
 	Version            string                 `json:"version"`
 	Timestamp          time.Time              `json:"timestamp"`
 	Status             int                    `json:"status"`
@@ -34,6 +36,31 @@ type Conversation struct {
 type setMemoryForms struct {
 	Memory            map[string]map[string]interface{} `json:"memory"`
 	ConversationToken string                            `json:"conversation_token"`
+}
+
+// IsPositive returns whether or not the sentiment is positive
+func (conv Conversation) IsPositive() bool {
+	return conv.Sentiment == SentimentPositive
+}
+
+// IsVeryPositive returns whether or not the sentiment is very positive
+func (conv Conversation) IsVeryPositive() bool {
+	return conv.Sentiment == SentimentVeryPositive
+}
+
+// IsNeutral returns whether or not the sentiment is neutral
+func (conv Conversation) IsNeutral() bool {
+	return conv.Sentiment == SentimentNeutral
+}
+
+// IsNegative returns whether or not the sentiment is negative
+func (conv Conversation) IsNegative() bool {
+	return conv.Sentiment == SentimentNegative
+}
+
+// IsVeryNegative returns whether or not the sentiment is very negative
+func (conv Conversation) IsVeryNegative() bool {
+	return conv.Sentiment == SentimentVeryNegative
 }
 
 func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) error {
