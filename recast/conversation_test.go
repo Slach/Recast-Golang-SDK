@@ -77,3 +77,17 @@ func TestReset(t *testing.T) {
 		t.Fatal("Expected err not to be nil, but instead got nil")
 	}
 }
+
+func TestSentimentHelpers(t *testing.T) {
+	conv := Conversation{
+		AuthorizationToken: "recast_token",
+		ConversationToken: "conversation_token",
+		Sentiment: "neutral",
+	}
+
+	expect(conv.IsNeutral(), t, "Should be neutral")
+	expect(!conv.IsPositive(), t, "Should not be positive")
+	expect(!conv.IsVeryPositive(), t, "Should not be very positive")
+	expect(!conv.IsNegative(), t, "Should not be negative")
+	expect(!conv.IsVeryNegative(), t, "Should be very negative")
+}
