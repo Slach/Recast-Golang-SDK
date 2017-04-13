@@ -2,17 +2,20 @@ package recast
 
 import (
 	"fmt"
-	"github.com/parnurzeal/gorequest"
 	"net/http"
 	"time"
+
+	"github.com/parnurzeal/gorequest"
 )
 
+// Action represents a conversation action
 type Action struct {
 	Slug  string `json:"slug"`
 	Done  bool   `json:"done"`
 	Reply string `json:"reply"`
 }
 
+// Conversation contains the response from the converse endpoint of the API
 type Conversation struct {
 	ConversationToken  string                 `json:"conversation_token"`
 	UUID               string                 `json:"uuid"`
@@ -22,7 +25,7 @@ type Conversation struct {
 	NextActions        []Action               `json:"next_actions"`
 	Memory             map[string]interface{} `json:"memory"`
 	Intents            []Intent               `json:"intents"`
-	Sentiment          string                 `json:"sentiment`
+	Sentiment          string                 `json:"sentiment"`
 	Entities           Entities               `json:"entities"`
 	Language           string                 `json:"language"`
 	ProcessingLanguage string                 `json:"processing_language"`
@@ -63,6 +66,7 @@ func (conv Conversation) IsVeryNegative() bool {
 	return conv.Sentiment == SentimentVeryNegative
 }
 
+// SetMemory allows to change the conversation memory variables
 func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) error {
 	httpClient := gorequest.New()
 
@@ -94,6 +98,7 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 	return nil
 }
 
+// ResetMemory empties all variables in the conversation
 func (conv *Conversation) ResetMemory() error {
 	httpClient := gorequest.New()
 
@@ -125,6 +130,7 @@ func (conv *Conversation) ResetMemory() error {
 	return nil
 }
 
+// Reset resets all the conversation (actions and variables)
 func (conv *Conversation) Reset() error {
 	httpClient := gorequest.New()
 
