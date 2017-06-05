@@ -6,6 +6,136 @@ type Component interface {
 	IsComponent() bool
 }
 
+type Carousel struct {
+	Type    string          `json:"type"`
+	Content []*CarouselCard `json:"content"`
+}
+
+func NewCarousel() *Carousel {
+	return &Carousel{
+		Type:    "carousel",
+		Content: []*CarouselCard{},
+	}
+}
+
+func (c *Carousel) AddCard(card *CarouselCard) *Carousel {
+	c.Content = append(c.Content, card)
+	return c
+}
+
+func (c *Carousel) IsComponent() bool {
+	return true
+}
+
+type CarouselCard struct {
+	Title    string       `json:"title"`
+	Subtitle string       `json:"subtitle"`
+	ImageUrl string       `json:"imageUrl"`
+	Buttons  []CardButton `json:"buttons"`
+}
+
+func NewCarouselCard(title, subtitle string) *CarouselCard {
+	return &CarouselCard{
+		Title:    title,
+		Subtitle: subtitle,
+		ImageUrl: "",
+		Buttons:  []CardButton{},
+	}
+}
+
+func (c *CarouselCard) AddImage(image string) *CarouselCard {
+	c.ImageUrl = image
+	return c
+}
+
+func (c *CarouselCard) AddButton(title, typ, value string) *CarouselCard {
+	c.Buttons = append(c.Buttons, CardButton{title, typ, value})
+	return c
+}
+
+// ListButton has the same content as a card button
+type ListButton CardButton
+
+// ListElement holds data for one list item
+type ListElement struct {
+	Title    string       `json:"title"`
+	ImageUrl string       `json:"imageUrl"`
+	Subtitle string       `json:"subtitle"`
+	Buttons  []ListButton `json:"buttons"`
+}
+
+// NewListElement initializes an empty list element with the given title and subtitle
+func NewListElement(title, subtitle string) *ListElement {
+	return &ListElement{
+		Title:    title,
+		Subtitle: subtitle,
+		ImageUrl: "",
+		Buttons:  []ListButton{},
+	}
+}
+
+// AddImage adds an image to a list element
+func (e *ListElement) AddImage(image string) *ListElement {
+	e.ImageUrl = image
+	return e
+}
+
+// AddButton adds a button to a list element
+// Each element can hold only one button
+func (e *ListElement) AddButton(title, typ, value string) *ListElement {
+	e.Buttons = append(e.Buttons, ListButton{
+		Title: title,
+		Type:  typ,
+		Value: value,
+	})
+	return e
+}
+
+// ListContent holds data for the list content
+type ListContent struct {
+	Elements []*ListElement `json:"elements"`
+	Buttons  []ListButton   `json:"buttons"`
+}
+
+// List hold formats for a list of the Recast.AI botconnector
+type List struct {
+	Type    string      `json:"type"`
+	Content ListContent `json:"content"`
+}
+
+// NewList initializes an empty list with the given title and subtitle
+func NewList() *List {
+	return &List{
+		Type: "list",
+		Content: ListContent{
+			Buttons:  []ListButton{},
+			Elements: []*ListElement{},
+		},
+	}
+}
+
+// AddElement adds a list element to a list
+// A list can hold a maximum of 4 elements
+func (l *List) AddElement(e *ListElement) *List {
+	l.Content.Elements = append(l.Content.Elements, e)
+	return l
+}
+
+// AddButton adds a button to a list
+func (l *List) AddButton(title, typ, value string) *List {
+	l.Content.Buttons = append(l.Content.Buttons, ListButton{
+		Title: title,
+		Type:  typ,
+		Value: value,
+	})
+	return l
+}
+
+// IsComponent marks Card as a valid messaging content
+func (l *List) IsComponent() bool {
+	return true
+}
+
 // CardButton holds data for a button in messaging channels formats
 type CardButton struct {
 	Title string `json:"title"`
@@ -56,8 +186,8 @@ func (c *Card) AddImage(imageUrl string) *Card {
 }
 
 // AddButton adds a button with the specified title, type and value to a Card
-func (c *Card) AddButton(title, type_, value string) *Card {
-	c.Content.Buttons = append(c.Content.Buttons, CardButton{title, type_, value})
+func (c *Card) AddButton(title, typ, value string) *Card {
+	c.Content.Buttons = append(c.Content.Buttons, CardButton{title, typ, value})
 	return c
 }
 
@@ -103,7 +233,7 @@ func (q *QuickReplies) AddButton(title, value string) *QuickReplies {
 }
 
 // IsComponent marks QuickReplies as a valid messaging content
-func (c *QuickReplies) IsComponent() bool {
+func (q *QuickReplies) IsComponent() bool {
 	return true
 }
 
