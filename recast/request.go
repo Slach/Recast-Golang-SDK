@@ -1,6 +1,7 @@
 package recast
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/parnurzeal/gorequest"
@@ -29,6 +30,13 @@ type ReqOpts struct {
 type forms struct {
 	Text     string `json:"text"`
 	Language string `json:"language"`
+}
+
+// rawEntities is used to isolate entities during json parsing to extract custom entities
+type rawEntities struct {
+	Results struct {
+		Entities map[string][]interface{} `json:"entities"`
+	} `json:"results"`
 }
 
 // AnalyzeText processes a text request to Recast.AI API and returns a Response
@@ -86,7 +94,13 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 	if resp.StatusCode != http.StatusOK {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
-	response.Results.CustomEntities = getCustomEntities(body)
+
+	var rawEntities rawEntities
+	err := json.Unmarshal(body, &rawEntities)
+	if err != nil {
+		return Response{}, err
+	}
+	response.Results.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
 
 	return response.Results, nil
 }
@@ -154,7 +168,14 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 	if resp.StatusCode != http.StatusOK {
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
-	response.Results.CustomEntities = getCustomEntities(body)
+
+	var rawEntities rawEntities
+	err = json.Unmarshal(body, &rawEntities)
+	if err != nil {
+		return Response{}, err
+	}
+
+	response.Results.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
 
 	return response.Results, nil
 }
@@ -240,8 +261,83 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	}
 
 	conversation := response.Results
-	conversation.CustomEntities = getCustomEntities(body)
+
+	var rawEntities rawEntities
+	err := json.Unmarshal(body, &rawEntities)
+	if err != nil {
+		return Conversation{}, err
+	}
+	conversation.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
 	conversation.AuthorizationToken = token
 
 	return conversation, nil
+}
+
+// DialogOpts contains options for DialogText method
+type DialogOpts struct {
+	Language       string
+	ConversationId string
+	Token          string
+}
+
+type dialogForm struct {
+	Language       string `json:"language"`
+	ConversationId string `json:"conversation_id"`
+	Message        dialogFormMessage
+}
+
+type dialogFormMessage struct {
+	Type    string `json:"type"`
+	Content string `json:"content"`
+}
+
+func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error) {
+	var conversationId string
+	lang := c.Language
+	token := c.Token
+
+	httpClient := gorequest.New()
+	if opts != nil {
+		if opts.Language != "" {
+			lang = opts.Language
+		}
+		if opts.Token != "" {
+			token = opts.Token
+		}
+		if opts.ConversationId != "" {
+			conversationId = opts.ConversationId
+		}
+	}
+
+	if token == "" {
+		return Dialog{}, ErrTokenNotSet
+	}
+
+	send := dialogForm{
+		Message:        dialogFormMessage{Type: "text", Content: text},
+		ConversationId: conversationId,
+		Language:       lang,
+	}
+
+	resp, body, requestErr := httpClient.
+		Post(dialogEndpoint).
+		Send(send).
+		Set("Authorization", fmt.Sprintf("Token %s", token)).
+		End()
+
+	if requestErr != nil {
+		return Dialog{}, requestErr[0]
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return Dialog{}, fmt.Errorf("Request failed (%s): %s", resp.Status, body)
+	}
+
+	dialog, err := parseDialog([]byte(body))
+	if err != nil {
+		return Dialog{}, fmt.Errorf("Json parsing failed: %+v", err)
+	}
+	dialog.Status = resp.StatusCode
+	return dialog, nil
 }

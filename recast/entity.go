@@ -1,9 +1,5 @@
 package recast
 
-import (
-	"encoding/json"
-)
-
 var (
 	goldEntities []string = []string{
 		"cardinal",
@@ -59,20 +55,10 @@ func isGold(entity string) bool {
 	return false
 }
 
-func getCustomEntities(data []byte) map[string][]CustomEntity {
+func getCustomEntities(rawEntities map[string][]interface{}) map[string][]CustomEntity {
 	customs := make(map[string][]CustomEntity, 0)
-	var result struct {
-		Results struct {
-			Entities map[string][]interface{} `json:"entities"`
-		} `json:"results"`
-	}
-	err := json.Unmarshal(data, &result)
 
-	if err != nil {
-		return customs
-	}
-
-	for k, v := range result.Results.Entities {
+	for k, v := range rawEntities {
 		var custom CustomEntity
 		if isGold(k) {
 			continue

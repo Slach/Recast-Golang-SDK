@@ -7,6 +7,7 @@ const (
 	requestEndpoint  string = "https://api.recast.ai/v2/request/"
 	converseEndpoint string = "https://api.recast.ai/v2/converse/"
 	monitorEndpoint  string = "https://api.recast.ai/monitor/v1/"
+	dialogEndpoint   string = "https://api.recast.ai/build/v1/dialog"
 
 	ActAssert  = "assert"
 	ActCommand = "command"

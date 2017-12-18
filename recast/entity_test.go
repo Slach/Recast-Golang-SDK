@@ -1,6 +1,7 @@
 package recast
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -57,7 +58,13 @@ const (
 )
 
 func TestCustomEntityParsing(t *testing.T) {
-	customs := getCustomEntities([]byte(jsonWithCustoms))
+	var rawEntities rawEntities
+	err := json.Unmarshal([]byte(jsonWithCustoms), &rawEntities)
+	if err != nil {
+		t.Fatal("Could not unmarshal json test")
+	}
+
+	customs := getCustomEntities(rawEntities.Results.Entities)
 	if len(customs) != 3 {
 		t.Fatal("Wrong number of custom entities parsed")
 	}
