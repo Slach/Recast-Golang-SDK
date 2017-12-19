@@ -281,9 +281,9 @@ type DialogOpts struct {
 }
 
 type dialogForm struct {
-	Language       string `json:"language"`
-	ConversationId string `json:"conversation_id"`
-	Message        dialogFormMessage
+	Language       string            `json:"language"`
+	ConversationId string            `json:"conversation_id"`
+	Message        dialogFormMessage `json:"message"`
 }
 
 type dialogFormMessage struct {
@@ -319,11 +319,17 @@ func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error
 		Language:       lang,
 	}
 
+	type respJSON struct {
+		Results json.RawMessage `json:"results"`
+		Message string          `json:"message"`
+	}
+	var response respJSON
+
 	resp, body, requestErr := httpClient.
 		Post(dialogEndpoint).
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
-		End()
+		EndStruct(&response)
 
 	if requestErr != nil {
 		return Dialog{}, requestErr[0]
@@ -334,10 +340,9 @@ func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error
 		return Dialog{}, fmt.Errorf("Request failed (%s): %s", resp.Status, body)
 	}
 
-	dialog, err := parseDialog([]byte(body))
+	dialog, err := parseDialog(response.Results)
 	if err != nil {
 		return Dialog{}, fmt.Errorf("Json parsing failed: %+v", err)
 	}
-	dialog.Status = resp.StatusCode
 	return dialog, nil
 }
