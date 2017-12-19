@@ -350,13 +350,9 @@ func TestDialogTextReturnsSuccessfulResponse(t *testing.T) {
 	res := httpmock.NewStringResponder(http.StatusOK, getSuccessfulDialogJSONResponse())
 	httpmock.RegisterResponder("POST", dialogEndpoint, res)
 
-	r, err := testClient.DialogText(testText, nil)
+	_, err := testClient.DialogText(testText, nil)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
-	}
-
-	if r.Status != http.StatusOK {
-		t.Fatalf("Expected status on response object to be %d, but instead got back: %d", http.StatusOK, r.Status)
 	}
 
 	opts := DialogOpts{
@@ -366,12 +362,8 @@ func TestDialogTextReturnsSuccessfulResponse(t *testing.T) {
 	res = httpmock.NewStringResponder(http.StatusOK, getSuccessfulDialogJSONResponse())
 	httpmock.RegisterResponder("POST", dialogEndpoint, res)
 
-	r, err = testClient.DialogText(testText, &opts)
+	_, err = testClient.DialogText(testText, &opts)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
-	}
-
-	if r.Status != http.StatusOK {
-		t.Fatalf("Expected status on response object to be %d, but instead got back: %d", http.StatusOK, r.Status)
 	}
 }
