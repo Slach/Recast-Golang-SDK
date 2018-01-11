@@ -334,3 +334,36 @@ func TestConverseTextrequestReturnsInvalidJSON(t *testing.T) {
 		t.Fatalf("Expected err to not be nil, but instead got nil")
 	}
 }
+
+func TestDialogTextReturnsSuccessfulResponse(t *testing.T) {
+	testClient := RequestClient{
+		Token:    "mocktoken",
+		Language: "en",
+	}
+
+	testText := "some random test text"
+
+	gorequest.DisableTransportSwap = true
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	res := httpmock.NewStringResponder(http.StatusOK, getSuccessfulDialogJSONResponse())
+	httpmock.RegisterResponder("POST", dialogEndpoint, res)
+
+	_, err := testClient.DialogText(testText, nil)
+	if err != nil {
+		t.Fatalf("Expected err to be nil, but instead got %+v", err)
+	}
+
+	opts := DialogOpts{
+		Token: "someother token",
+	}
+
+	res = httpmock.NewStringResponder(http.StatusOK, getSuccessfulDialogJSONResponse())
+	httpmock.RegisterResponder("POST", dialogEndpoint, res)
+
+	_, err = testClient.DialogText(testText, &opts)
+	if err != nil {
+		t.Fatalf("Expected err to be nil, but instead got %+v", err)
+	}
+}
