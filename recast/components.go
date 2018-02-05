@@ -6,11 +6,13 @@ type Component interface {
 	IsComponent() bool
 }
 
+//Carousel complex type see https://recast.ai/docs/structured-messages for details
 type Carousel struct {
 	Type    string          `json:"type"`
 	Content []*CarouselCard `json:"content"`
 }
 
+//NewCarousel create new Carousel see https://recast.ai/docs/structured-messages for details
 func NewCarousel() *Carousel {
 	return &Carousel{
 		Type:    "carousel",
@@ -18,36 +20,42 @@ func NewCarousel() *Carousel {
 	}
 }
 
+//AddCard append card component into Carousel
 func (c *Carousel) AddCard(card *CarouselCard) *Carousel {
 	c.Content = append(c.Content, card)
 	return c
 }
 
+//IsComponent CarouselCard is Component
 func (c *Carousel) IsComponent() bool {
 	return true
 }
 
+//CarouselCard item of Carousel see https://recast.ai/docs/structured-messages for details
 type CarouselCard struct {
 	Title    string       `json:"title"`
 	Subtitle string       `json:"subtitle"`
-	ImageUrl string       `json:"imageUrl"`
+	ImageURL string       `json:"imageUrl"`
 	Buttons  []CardButton `json:"buttons"`
 }
 
+//NewCarouselCard create of CarouselCard see https://recast.ai/docs/structured-messages for details
 func NewCarouselCard(title, subtitle string) *CarouselCard {
 	return &CarouselCard{
 		Title:    title,
 		Subtitle: subtitle,
-		ImageUrl: "",
+		ImageURL: "",
 		Buttons:  []CardButton{},
 	}
 }
 
+//AddImage add image_url
 func (c *CarouselCard) AddImage(image string) *CarouselCard {
-	c.ImageUrl = image
+	c.ImageURL = image
 	return c
 }
 
+//AddButton add button to CarouselCard.Buttons
 func (c *CarouselCard) AddButton(title, typ, value string) *CarouselCard {
 	c.Buttons = append(c.Buttons, CardButton{title, typ, value})
 	return c
@@ -59,7 +67,7 @@ type ListButton CardButton
 // ListElement holds data for one list item
 type ListElement struct {
 	Title    string       `json:"title"`
-	ImageUrl string       `json:"imageUrl"`
+	ImageURL string       `json:"imageUrl"`
 	Subtitle string       `json:"subtitle"`
 	Buttons  []ListButton `json:"buttons"`
 }
@@ -69,14 +77,14 @@ func NewListElement(title, subtitle string) *ListElement {
 	return &ListElement{
 		Title:    title,
 		Subtitle: subtitle,
-		ImageUrl: "",
+		ImageURL: "",
 		Buttons:  []ListButton{},
 	}
 }
 
 // AddImage adds an image to a list element
 func (e *ListElement) AddImage(image string) *ListElement {
-	e.ImageUrl = image
+	e.ImageURL = image
 	return e
 }
 
@@ -147,7 +155,7 @@ type CardButton struct {
 type CardContent struct {
 	Title    string       `json:"title"`
 	Subtitle string       `json:"subtitle"`
-	ImageUrl string       `json:"imageUrl"`
+	ImageURL string       `json:"imageUrl"`
 	Buttons  []CardButton `json:"buttons"`
 }
 
@@ -180,8 +188,8 @@ func (c *Card) IsComponent() bool {
 }
 
 // AddImage sets the image that will be displayed in the message
-func (c *Card) AddImage(imageUrl string) *Card {
-	c.Content.ImageUrl = imageUrl
+func (c *Card) AddImage(imageURL string) *Card {
+	c.Content.ImageURL = imageURL
 	return c
 }
 

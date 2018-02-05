@@ -24,31 +24,31 @@ func TestSendMessageParameters(t *testing.T) {
 		Type:    "text",
 	}
 	client := NewConnectClient("recast_token")
-	conversationId := "conversation_id"
+	conversationID := "conversation_id"
 
 	gorequest.DisableTransportSwap = true
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
 	res := httpmock.NewStringResponder(http.StatusCreated, getSuccessfulPostMessageResponse())
-	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationId+"/messages", res)
+	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationID+"/messages", res)
 
-	err := client.SendMessage(conversationId, attachment, card, quickReplies)
+	err := client.SendMessage(conversationID, attachment, card, quickReplies)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
 	}
 
-	err = client.SendMessage(conversationId, card, quickReplies)
+	err = client.SendMessage(conversationID, card, quickReplies)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
 	}
 
-	err = client.SendMessage(conversationId, attachment, quickReplies, card)
+	err = client.SendMessage(conversationID, attachment, quickReplies, card)
 	if err != nil {
 		t.Fatalf("Expected err to be nil, but instead got %+v", err)
 	}
 
-	err = client.SendMessage(conversationId)
+	err = client.SendMessage(conversationID)
 	if err == nil {
 		t.Fatalf("Expected err not to be nil, but instead got nil")
 	}
@@ -56,28 +56,34 @@ func TestSendMessageParameters(t *testing.T) {
 }
 
 func TestSendMessageErrors(t *testing.T) {
+	var err error
 	attachment := Attachment{
 		Content: "Hello",
 		Type:    "bad_type",
 	}
 	client := NewConnectClient("recast_token")
-	conversationId := "conversation_id"
+	conversationID := "conversation_id"
 
 	gorequest.DisableTransportSwap = true
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
 	res := httpmock.NewStringResponder(http.StatusBadRequest, getBadRequestJSONResponse())
-	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationId+"/messages", res)
+	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationID+"/messages", res)
 
-	err := client.SendMessage(conversationId, attachment)
+	err = client.SendMessage("", attachment)
+	if err == nil {
+		t.Fatalf("Expected err not to be nil, but instead got nil")
+	}
+
+	err = client.SendMessage(conversationID, attachment)
 	if err == nil {
 		t.Fatalf("Expected err not to be nil, but instead got nil")
 	}
 
 	res = httpmock.NewStringResponder(http.StatusInternalServerError, getServerErrorJSONResponse())
-	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationId+"/messages", res)
-	err = client.SendMessage(conversationId, attachment)
+	httpmock.RegisterResponder("POST", conversationsEndpoint+conversationID+"/messages", res)
+	err = client.SendMessage(conversationID, attachment)
 	if err == nil {
 		t.Fatalf("Expected err not to be nil, but instead got nil")
 	}
@@ -174,7 +180,7 @@ func TestParseMessage(t *testing.T) {
 		t.Error("Payload should be considered as valid")
 	}
 
-	if msg.ConversationId != "f206b482-cb0c-435b-91bc-4628c8829d83" {
+	if msg.ConversationID != "f206b482-cb0c-435b-91bc-4628c8829d83" {
 		t.Error("Invalid conversation id")
 	}
 }

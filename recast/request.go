@@ -95,12 +95,12 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	var rawEntities rawEntities
-	err := json.Unmarshal(body, &rawEntities)
+	var entities rawEntities
+	err := json.Unmarshal(body, &entities)
 	if err != nil {
 		return Response{}, err
 	}
-	response.Results.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
+	response.Results.CustomEntities = getCustomEntities(entities.Results.Entities)
 
 	return response.Results, nil
 }
@@ -169,13 +169,13 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		return Response{}, fmt.Errorf("Request failed (%s): %s", resp.Status, response.Message)
 	}
 
-	var rawEntities rawEntities
-	err = json.Unmarshal(body, &rawEntities)
+	var entities rawEntities
+	err = json.Unmarshal(body, &entities)
 	if err != nil {
 		return Response{}, err
 	}
 
-	response.Results.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
+	response.Results.CustomEntities = getCustomEntities(entities.Results.Entities)
 
 	return response.Results, nil
 }
@@ -262,12 +262,12 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 
 	conversation := response.Results
 
-	var rawEntities rawEntities
-	err := json.Unmarshal(body, &rawEntities)
+	var entities rawEntities
+	err := json.Unmarshal(body, &entities)
 	if err != nil {
 		return Conversation{}, err
 	}
-	conversation.CustomEntities = getCustomEntities(rawEntities.Results.Entities)
+	conversation.CustomEntities = getCustomEntities(entities.Results.Entities)
 	conversation.AuthorizationToken = token
 
 	return conversation, nil
@@ -276,13 +276,13 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 // DialogOpts contains options for DialogText method
 type DialogOpts struct {
 	Language       string
-	ConversationId string
+	ConversationID string
 	Token          string
 }
 
 type dialogForm struct {
 	Language       string            `json:"language"`
-	ConversationId string            `json:"conversation_id"`
+	ConversationID string            `json:"conversation_id"`
 	Message        dialogFormMessage `json:"message"`
 }
 
@@ -291,8 +291,9 @@ type dialogFormMessage struct {
 	Content string `json:"content"`
 }
 
+//DialogText retrieve all metadata, intents and replies from a sentence
 func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error) {
-	var conversationId string
+	var conversationID string
 	lang := c.Language
 	token := c.Token
 
@@ -304,8 +305,8 @@ func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error
 		if opts.Token != "" {
 			token = opts.Token
 		}
-		if opts.ConversationId != "" {
-			conversationId = opts.ConversationId
+		if opts.ConversationID != "" {
+			conversationID = opts.ConversationID
 		}
 	}
 
@@ -315,7 +316,7 @@ func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error
 
 	send := dialogForm{
 		Message:        dialogFormMessage{Type: "text", Content: text},
-		ConversationId: conversationId,
+		ConversationID: conversationID,
 		Language:       lang,
 	}
 

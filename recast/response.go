@@ -16,7 +16,7 @@ type Entities struct {
 	Duration     []Duration     `json:"duration"`
 	Email        []Email        `json:"email"`
 	Emoji        []Emoji        `json:"emoji"`
-	Ip           []Ip           `json:"ip"`
+	IP           []IP           `json:"ip"`
 	Interval     []Interval     `json:"interval"`
 	Job          []Job          `json:"job"`
 	Language     []Language     `json:"language"`

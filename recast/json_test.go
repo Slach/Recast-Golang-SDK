@@ -157,8 +157,8 @@ func getValidConversationMessage() string {
 		"isActive": true,
 		"_id": "61a7921b-f771-4211-82ca-05885160fd6d"
 	},
-	"chatId": "chatId",
-	"senderId": "senderId"
+	"chatId": 123456,
+	"senderId": 123467
 }`
 }
 

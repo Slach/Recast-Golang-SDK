@@ -5,8 +5,9 @@ import (
 	"fmt"
 )
 
+//DialogConversation see https://recast.ai/docs/api-reference/#dialog-text
 type DialogConversation struct {
-	Id              string                 `json:"id"`
+	ID              string                 `json:"id"`
 	Language        string                 `json:"language"`
 	Skill           string                 `json:"skill"`
 	SkillOccurences int                    `json:"skill_occurences"`

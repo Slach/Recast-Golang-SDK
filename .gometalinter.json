@@ -1,0 +1,7 @@
+{
+  "Linters": {
+    "gocyclo": {"Command": "gocyclo -over 15"}
+  },
+  "EnableAll": true,
+  "EnableGC": true
+}

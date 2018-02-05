@@ -58,13 +58,13 @@ const (
 )
 
 func TestCustomEntityParsing(t *testing.T) {
-	var rawEntities rawEntities
-	err := json.Unmarshal([]byte(jsonWithCustoms), &rawEntities)
+	var entities rawEntities
+	err := json.Unmarshal([]byte(jsonWithCustoms), &entities)
 	if err != nil {
 		t.Fatal("Could not unmarshal json test")
 	}
 
-	customs := getCustomEntities(rawEntities.Results.Entities)
+	customs := getCustomEntities(entities.Results.Entities)
 	if len(customs) != 3 {
 		t.Fatal("Wrong number of custom entities parsed")
 	}

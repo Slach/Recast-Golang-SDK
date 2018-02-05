@@ -1,7 +1,7 @@
 package recast
 
 var (
-	goldEntities []string = []string{
+	goldEntities = []string{
 		"cardinal",
 		"color",
 		"datetime",
@@ -145,8 +145,8 @@ type Emoji struct {
 	Confidence  float64  `json:"confidence"`
 }
 
-// Ip Recast.AI entity
-type Ip struct {
+// IP Recast.AI entity
+type IP struct {
 	Formatted  string  `json:"formatted"`
 	Lat        float64 `json:"lat"`
 	Lng        float64 `json:"lng"`
@@ -306,8 +306,8 @@ type Temperature struct {
 	Confidence float64 `json:"confidence"`
 }
 
-// Url Recast.AI entity
-type Url struct {
+// URL Recast.AI entity
+type URL struct {
 	Scheme     string  `json:"scheme"`
 	Host       string  `json:"host"`
 	Path       string  `json:"path"`
