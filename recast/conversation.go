@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/parnurzeal/gorequest"
+	"os"
 )
 
 // Action represents a conversation action
@@ -83,6 +84,7 @@ func (conv *Conversation) SetMemory(memory map[string]map[string]interface{}) er
 	resp, _, requestErr := httpClient.
 		Put(converseEndpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
 		EndStruct(&response)
 
@@ -115,6 +117,7 @@ func (conv *Conversation) ResetMemory() error {
 	resp, _, requestErr := httpClient.
 		Put(converseEndpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
 		EndStruct(&response)
 
@@ -140,6 +143,7 @@ func (conv *Conversation) Reset() error {
 
 	resp, _, requestErr := httpClient.
 		Delete(converseEndpoint+"?conversation_token="+conv.ConversationToken).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", conv.AuthorizationToken)).
 		EndStruct(&response)
 

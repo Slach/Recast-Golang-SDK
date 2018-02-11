@@ -7,6 +7,7 @@ import (
 	"github.com/parnurzeal/gorequest"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
@@ -84,6 +85,7 @@ func (c *RequestClient) AnalyzeText(text string, opts *ReqOpts) (Response, error
 		Post(requestEndpoint).
 		Send(send).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		EndStruct(&response)
 
 	if requestErr != nil {
@@ -158,6 +160,7 @@ func (c *RequestClient) AnalyzeFile(filename string, opts *ReqOpts) (Response, e
 		Type("multipart").
 		SendFile(fileContent, "filename", "voice").
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).EndStruct(&response)
 
 	if requestErr != nil {
@@ -248,6 +251,7 @@ func (c *RequestClient) ConverseText(text string, opts *ConverseOpts) (Conversat
 	resp, body, requestErr := httpClient.
 		Post(converseEndpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
 		EndStruct(&response)
 
@@ -329,6 +333,7 @@ func (c *RequestClient) DialogText(text string, opts *DialogOpts) (Dialog, error
 	resp, body, requestErr := httpClient.
 		Post(dialogEndpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", token)).
 		EndStruct(&response)
 
