@@ -128,7 +128,7 @@ func (client *ConnectClient) SendMessage(conversationID string, messages ...Comp
 		Message string `json:"message"`
 	}
 
-	resp, respBytes, requestErr := httpClient.
+	resp, _, requestErr := httpClient.
 		Post(endpoint).
 		Send(send).
 		Proxy(os.Getenv("RECAST_PROXY")).
@@ -136,11 +136,6 @@ func (client *ConnectClient) SendMessage(conversationID string, messages ...Comp
 		EndStruct(&response)
 
 	if requestErr != nil {
-		fmt.Println(resp)
-		fmt.Println(respBytes)
-		for _, err := range requestErr {
-			fmt.Println(err)
-		}
 		return requestErr[0]
 	}
 
