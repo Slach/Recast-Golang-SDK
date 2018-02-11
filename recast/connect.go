@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/parnurzeal/gorequest"
+	"os"
 	"strconv"
 )
 
@@ -130,6 +131,7 @@ func (client *ConnectClient) SendMessage(conversationID string, messages ...Comp
 	resp, respBytes, requestErr := httpClient.
 		Post(endpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", client.Token)).
 		EndStruct(&response)
 
@@ -173,6 +175,7 @@ func (client *ConnectClient) BroadcastMessage(messages ...Component) error {
 	resp, _, requestErr := httpClient.
 		Post(messagesEndpoint).
 		Send(send).
+		Proxy(os.Getenv("RECAST_PROXY")).
 		Set("Authorization", fmt.Sprintf("Token %s", client.Token)).
 		EndStruct(&response)
 

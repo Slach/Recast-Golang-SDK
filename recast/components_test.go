@@ -5,7 +5,7 @@ import (
 )
 
 func TestComponentsInterface(t *testing.T) {
-	// Attachment, Cards and QuickReplies should implement IsComponent
+	// Attachment, Cards, QuickReplies and Carousel should implement IsComponent
 
 	card := NewCard("card title", "subtitle").
 		AddImage("image_url").
@@ -32,13 +32,21 @@ func TestComponentsInterface(t *testing.T) {
 		t.Fatalf("quickReplies should implement IsComponent")
 	}
 
-	//All other components
 	carousel := NewCarousel()
 	if !carousel.IsComponent() {
 		t.Fatalf("carousel should implement IsComponent")
 	}
 
+}
+
+func TestAdditionalElementsCreation(t *testing.T) {
 	listElement := NewListElement("title", "subtitle")
+	listElement.AddImage("image_url")
+	listElement.AddButton("Button", "postback", "Button Content")
+	if len(listElement.Buttons) != 1 {
+		t.Fatalf("listElement should contains one Button")
+	}
+
 	list := NewList()
 	list.AddButton("Button", "postback", "Button Content")
 	list.AddElement(listElement)
@@ -58,6 +66,11 @@ func TestComponentsInterface(t *testing.T) {
 		}
 	}
 
+	carousel := NewCarousel()
+	if !carousel.IsComponent() {
+		t.Fatalf("carousel should implement IsComponent")
+	}
+
 	carouselCard := NewCarouselCard("carousel card title", "subtitle").
 		AddImage("image_url").
 		AddButton("Button", "postback", "Button content")
@@ -68,5 +81,14 @@ func TestComponentsInterface(t *testing.T) {
 
 	if len(carouselCard.Buttons) != 1 {
 		t.Fatalf("carouselCard should contains one Button")
+	}
+	carousel.AddCard(carouselCard)
+	if len(carousel.Content) != 1 {
+		t.Fatal("carousel should have 1 Content element after AddCard")
+	}
+
+	textMessage := NewTextMessage("test")
+	if textMessage.Type != "text" || textMessage.Content != "test" {
+		t.Fatal("NewTextMessage should return Type==text and Content==test")
 	}
 }
