@@ -178,6 +178,7 @@ func NewCard(title, subtitle string) *Card {
 		Content: CardContent{
 			Title:    title,
 			Subtitle: subtitle,
+			Buttons:  []CardButton{},
 		},
 	}
 }
@@ -227,7 +228,8 @@ func NewQuickReplies(title string) *QuickReplies {
 	return &QuickReplies{
 		Type: "quickReplies",
 		Content: QuickRepliesContent{
-			Title: title,
+			Title:   title,
+			Buttons: []QuickRepliesButton{},
 		},
 	}
 }
